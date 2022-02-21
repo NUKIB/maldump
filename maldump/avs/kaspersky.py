@@ -46,7 +46,7 @@ class Kaspersky(Quarantine):
         for row in rows:
             malfile = self._get_malfile(row[0])
             q = QuarEntry()
-            q.timestamp = str(self._normalize_time(row[6])) + ' (local)'
+            q.timestamp = self._normalize_time(row[6])
             q.threat = row[3]
             q.path = row[1] + row[2]
             q.size = row[7]
