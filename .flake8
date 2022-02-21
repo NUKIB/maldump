@@ -1,0 +1,6 @@
+[flake8]
+exclude =
+    __pycache__
+    env
+    venv
+    maldump/parsers
