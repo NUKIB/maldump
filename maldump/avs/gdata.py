@@ -10,7 +10,6 @@ class GData(Quarantine):
         self.name = 'G Data'
         self.location = Path('ProgramData/G Data/AVK/Quarantine')
 
-
     def export(self):
         quarfiles = []
         for metafile in self.location.glob('*.q'):

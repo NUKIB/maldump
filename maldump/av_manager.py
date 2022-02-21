@@ -1,5 +1,6 @@
 from maldump.avs import *
 
+
 class AVManager():
     """Container class holding all instances"""
     avs = [

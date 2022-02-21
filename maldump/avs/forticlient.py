@@ -10,16 +10,13 @@ class FortiClient(Quarantine):
         self.name = 'FortiClient'
         self.location = Path('Program Files/Fortinet/FortiClient/quarantine')
 
-
     def _normalize_path(self, path):
         if path[2:4] == '?\\':
             path = path[4:]
         return path
 
-
     def _get_time(self, ts):
         return dt(ts.year, ts.month, ts.day, ts.hour, ts.minute, ts.second)
-
 
     def export(self):
         quarfiles = []

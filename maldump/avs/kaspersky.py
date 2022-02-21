@@ -12,7 +12,6 @@ class Kaspersky(Quarantine):
         self.name = 'Kaspersky for Windows Server'
         self.location = Path('ProgramData/Kaspersky Lab/Kaspersky Security for Windows Server/11.0/Quarantine')
 
-
     def _normalize_time(self, number):
         year = (number >> 48) & 0xFFFF
         month = (number >> 40) & 0xFF
@@ -23,13 +22,11 @@ class Kaspersky(Quarantine):
 
         return dt(year, month, days, hours, minutes, seconds)
 
-
     def _get_malfile(self, data):
         file = self.location / data
         key = [0xE2, 0x45, 0x48, 0xEC, 0x69, 0x0E, 0x5C, 0xAC]
         with open(file, 'rb') as f:
             return xor(f.read(), key)
-
 
     def export(self):
         try:

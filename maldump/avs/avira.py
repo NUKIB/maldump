@@ -10,7 +10,6 @@ class Avira(Quarantine):
         self.name = 'Avira'
         self.location = Path('ProgramData/Avira/Antivirus/INFECTED')
 
-
     def export(self):
         quarfiles = []
         for metafile in self.location.glob('*.qua'):

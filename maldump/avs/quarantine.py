@@ -8,7 +8,7 @@ class QuarEntry():
         self.timestamp = ''  # datetime
         self.threat = ''     # string
         self.path = ''       # string
-        self.size = ''       # int
+        self.size = ''       # integer
         self.md5 = ''        # string
         self.malfile = ''    # bytes-like
 
@@ -22,7 +22,6 @@ class Quarantine(object):
 
         # Absolute location of the quarantine folder
         self.location = Path()
-
 
     """Interface for the export function
 

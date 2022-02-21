@@ -8,8 +8,6 @@ import os
 import sys
 import ctypes
 import pathlib
-import textwrap
-import time
 
 from colorama import Fore, Style, init
 from maldump.av_manager import AVManager
@@ -85,7 +83,8 @@ def list_files(avs):
     for i, av in enumerate(avs):
         entries = av.export()
         if len(entries) > 0:
-            if i != 0: print()
+            if i != 0:
+                print()
             print(Fore.YELLOW + '---', av.name, '---' + Style.RESET_ALL)
             for e in entries:
                 print(e.path)
@@ -95,15 +94,13 @@ def parse_cli():
     parser = argparse.ArgumentParser(
         prog='maldump',
         formatter_class=argparse.RawTextHelpFormatter,
-        description=textwrap.fill(
-            '''Multi-quarantine extractor'''),
-        epilog='Supported quarantines:\n' +
-            '\n'.join(sorted(['  * ' + av.name for av in AVManager.avs]))
+        description='Multi-quarantine extractor',
+        epilog='Supported quarantines:\n' + '\n'.join(sorted(['  * ' + av.name for av in AVManager.avs]))
     )
 
     parser.add_argument(
-        'root_dir', type=pathlib.Path, 
-        help='root directory where OS is installed (example C:\)'
+        'root_dir', type=pathlib.Path,
+        help=r'root directory where OS is installed (example C:\)'
     )
     parser.add_argument(
         '-l', '--list', action='store_true',

@@ -11,13 +11,11 @@ class WindowsDefender(Quarantine):
         self.name = 'Microsoft Defender'
         self.location = Path('ProgramData/Microsoft/Windows Defender/Quarantine')
 
-
     def _normalize(self, path_chrs):
         path_str = ''.join(map(chr, path_chrs[:-1]))
         if path_str[2:4] == '?\\':
             path_str = path_str[4:]
         return path_str
-
 
     def _get_malfile(self, guid):
         quarfile = self.location / 'ResourceData' / guid[:2] / guid
@@ -25,7 +23,6 @@ class WindowsDefender(Quarantine):
         malfile = kt.encryptedfile.mal_file
         kt.close()
         return malfile
-
 
     def export(self):
         quarfiles = []
