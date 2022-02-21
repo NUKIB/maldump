@@ -33,5 +33,6 @@ class FortiClient(Quarantine):
             q.md5 = md5(kt.mal_file).digest().hex()
             q.malfile = kt.mal_file
             quarfiles.append(q)
+            kt.close()
 
         return quarfiles
