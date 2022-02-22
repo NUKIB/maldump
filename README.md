@@ -34,8 +34,8 @@ $ cd maldump
 Create new environment and activate it
 
 ```
-$ python3 -m venv env
-$ . env/bin/activate
+$ python3 -m venv venv
+$ . venv/bin/activate
 ```
 
 Install dependencies
@@ -104,6 +104,13 @@ List quarantine files from a windows partition mounted on `/mnt/win`
 ```
 $ maldump /mnt/win
 ```
+
+## Disclaimer
+
+Keep in mind, all timestamps are in UTC **except** for "Kaspersky for Windows Server" which stores timestamps in a local timezone.
+
+For optimal results, admin privileges are required when running on Windows system. Linux does not require admin rights.
+
 
 ## Contributing
 
