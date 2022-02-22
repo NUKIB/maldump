@@ -30,14 +30,12 @@ class Kaspersky(Quarantine):
 
     def export(self):
         try:
-            conn = sqlite3.connect(self.location / 'quarantine.db')
+            conn = sqlite3.connect(str(self.location / 'quarantine.db'))
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM 'objects'")
             rows = cursor.fetchall()
         except Exception as e:
             print('Kaspersky DB Error: ' + str(e))
-        finally:
-            conn.close()
 
         quarfiles = []
         for row in rows:
@@ -51,4 +49,5 @@ class Kaspersky(Quarantine):
             q.malfile = malfile
             quarfiles.append(q)
 
+        conn.close()
         return quarfiles
