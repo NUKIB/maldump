@@ -71,8 +71,8 @@ class Avast(Quarantine):
             chest_id = get(e, 'ChestId')
             path = get(e, 'OrigFolder') + '\\' + get(e, 'OrigFileName')
             # Check if an entry is in the vault.db
-            inVault = e.find('IDPBlob') is not None
-            if inVault:
+            is_in_vault = e.find('IDPBlob') is not None
+            if is_in_vault:
                 malfile = self._getRawFromVault(path)
             else:
                 malfile = self._getRawFromFile(chest_id)
