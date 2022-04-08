@@ -10,6 +10,7 @@ Supports extraction from the following AV products
 
   * Avast Antivirus
   * Avira Antivirus
+  * Eset NOD32
   * FortiClient
   * G Data
   * Kaspersky for Windows Server
