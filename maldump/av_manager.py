@@ -11,6 +11,7 @@ class AVManager():
         avast.Avast(),
         avira.Avira(),
         kaspersky.Kaspersky(),
+        eset.EsetNOD32()
     ]
 
     @classmethod
