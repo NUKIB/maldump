@@ -1,6 +1,6 @@
 # maldump
 
-[![](https://img.shields.io/badge/Category-Applications%20in%20Python-E5A505?style=flat-square)]() [![](https://img.shields.io/badge/Language-Python-E5A505?style=flat-square)]() [![](https://img.shields.io/badge/Version-0.1.0-E5A505?style=flat-square&color=green)]()
+[![](https://img.shields.io/badge/Category-Applications%20in%20Python-E5A505?style=flat-square)]() [![](https://img.shields.io/badge/Language-Python-E5A505?style=flat-square)]() [![](https://img.shields.io/badge/Version-0.2.0-E5A505?style=flat-square&color=green)]()
 
 Maldump makes it easy to extract quarantined files of multiple AVs from a live system or a mounted disk image.
 

@@ -13,7 +13,7 @@ from colorama import Fore, Style, init
 from maldump.av_manager import AVManager
 
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 
 def main():
