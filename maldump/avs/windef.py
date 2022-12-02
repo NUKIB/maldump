@@ -1,6 +1,8 @@
 from .quarantine import *
 from maldump.parsers.windef_entries import WindefEntries
 from maldump.parsers.windef_resource_data import WindefResourceData
+import glob
+import shutil
 
 
 class WindowsDefender(Quarantine):
