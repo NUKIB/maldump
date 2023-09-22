@@ -16,6 +16,8 @@ Supports extraction from the following AV products
   * Kaspersky for Windows Server
   * Malwarebytes
   * Microsoft Defender
+  * McAfee
+  * AVG
 
 ## Installation
 
@@ -67,7 +69,8 @@ optional arguments:
   -q, --quar     dump quarantined file(s) to archive 'quarantine.tar'
   -m, --meta     dump metadata to CSV file 'quarantine.csv'
   -a, --all      equivalent of running both -q and -m
-  -v, --version  show program's version number and exit     
+  -v, --version  show program's version number and exit
+  -d, --dest     destination for exported files
 ```
 
 ## Examples
@@ -112,16 +115,9 @@ Keep in mind, all timestamps are in UTC **except** for "Kaspersky for Windows Se
 
 For optimal results, admin privileges are required when running on Windows system. Linux does not require admin rights.
 
-
 ## Contributing
 
-To contribute to this project, follow these steps:
-
-1. Fork this repository.
-2. Create a branch: `git checkout -b <branch_name>`
-3. Make your changes and commit them: `git commit -m '<commit_message>'`
-4. Push to the original branch: `git push origin <project_name/location>`
-5. Create a pull request.
+To contribute to this project, please follow the [CONTRIBUTING](./CONTRIBUTING.md).
 
 ## License
 
