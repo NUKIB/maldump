@@ -1,26 +1,24 @@
-from .quarantine import *
+from __future__ import annotations
+
+from pathlib import Path
+from typing import List
+
 from maldump.parsers.avira_parser import AviraParser
+from maldump.types import Quarantine, QuarEntry
 
 
 class Avira(Quarantine):
     """Implements Avira quarantine format"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.name = 'Avira'
         self.location = Path('ProgramData/Avira/Antivirus/INFECTED')
 
-    def export(self):
-        quarfiles = []
-        for metafile in self.location.glob('*.qua'):
-            kt = AviraParser.from_file(metafile)
-            q = QuarEntry()
-            q.timestamp = dt.fromtimestamp(kt.qua_time)
-            q.threat = kt.mal_type
-            q.path = kt.filename[4:]
-            q.size = len(kt.mal_file)
-            q.md5 = md5(kt.mal_file).digest().hex()
-            q.malfile = kt.mal_file
-            quarfiles.append(q)
+    def export(self) -> List[QuarEntry]:
+        quarfiles = AviraParser().from_file(
+            name=self.name,
+            location=self.location
+        )
 
         return quarfiles
