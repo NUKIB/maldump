@@ -54,6 +54,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+.mypy_cache
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow
 __pypackages__/
