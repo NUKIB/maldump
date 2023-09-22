@@ -3,20 +3,20 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List
 
-from maldump.parsers.gdata_parser import GdataParser
+from maldump.parsers.avg_parser import AVGParser
 from maldump.types import Quarantine, QuarEntry
 
 
-class GData(Quarantine):
-    """Implements G Data quarantine format"""
+class AVG(Quarantine):
+    """Implements AVG quarantine format"""
 
     def __init__(self) -> None:
         super().__init__()
-        self.name = 'G Data'
-        self.location = Path('ProgramData/G Data/AVK/Quarantine')
+        self.name = 'AVG'
+        self.location = Path('ProgramData/AVG/Antivirus/chest')
 
     def export(self) -> List[QuarEntry]:
-        quarfiles = GdataParser().from_file(
+        quarfiles = AVGParser().from_file(
             name=self.name,
             location=self.location
         )

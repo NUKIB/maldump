@@ -3,23 +3,21 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List
 
-from maldump.parsers.kaspersky_parser import KasperskyParser
+from maldump.parsers.mcafee_parser import McafeeParser
 from maldump.types import Quarantine, QuarEntry
 
 
-class Kaspersky(Quarantine):
-    """Implements Kaspersky quarantine format"""
+class McAfee(Quarantine):
+    """Implements McAfee quarantine format"""
 
     def __init__(self) -> None:
         super().__init__()
-        self.name = 'Kaspersky for Windows Server'
+        self.name = 'McAfee'
         self.location = Path(
-            'ProgramData/Kaspersky Lab/Kaspersky Security for Windows Server' +
-            '/11.0/Quarantine'
-        )
+            'ProgramData/McAfee/VirusScan/Quarantine/quarantine')
 
     def export(self) -> List[QuarEntry]:
-        quarfiles = KasperskyParser().from_file(
+        quarfiles = McafeeParser().from_file(
             name=self.name,
             location=self.location
         )
