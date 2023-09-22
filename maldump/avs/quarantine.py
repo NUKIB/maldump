@@ -1,6 +1,4 @@
 from pathlib import Path
-from hashlib import md5
-from datetime import datetime as dt
 
 
 class QuarEntry():
