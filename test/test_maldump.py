@@ -43,7 +43,7 @@ class TestExport(unittest.TestCase):
                 self.assertIsInstance(entry.malfile, bytes)
                 self.assertEqual(
                     entry.malfile,
-                    br'X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*'
+                    br'X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*'  # noqa: E501
                 )
 
 
