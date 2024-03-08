@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List
 
 from maldump.parsers.eset_parser import EsetParser
-from maldump.types import Quarantine, QuarEntry
+from maldump.structures import Quarantine, QuarEntry
 
 
 class EsetNOD32(Quarantine):

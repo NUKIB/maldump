@@ -3,7 +3,7 @@ from hashlib import md5
 from typing import List
 
 from maldump.parsers.kaitai.gdata_parser import GdataParser as KaitaiParser
-from maldump.types import QuarEntry
+from maldump.structures import QuarEntry
 
 
 class GdataParser():

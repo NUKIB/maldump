@@ -15,7 +15,7 @@ from typing import List
 from colorama import Fore, Style, init
 
 from maldump.av_manager import AVManager
-from maldump.types import Quarantine
+from maldump.structures import Quarantine
 
 __version__ = '0.3.0'
 

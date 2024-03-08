@@ -7,7 +7,7 @@ from zipfile import ZipFile
 
 import defusedxml.ElementTree as ET
 
-from maldump.types import QuarEntry
+from maldump.structures import QuarEntry
 
 
 class McafeeParser():

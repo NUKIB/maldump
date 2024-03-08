@@ -3,7 +3,7 @@ from datetime import datetime as dt
 from hashlib import md5
 from typing import List
 
-from maldump.types import QuarEntry
+from maldump.structures import QuarEntry
 from maldump.utils import xor
 
 

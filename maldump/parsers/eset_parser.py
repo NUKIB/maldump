@@ -22,7 +22,7 @@ from hashlib import md5
 from pathlib import Path
 from typing import List
 
-from maldump.types import QuarEntry
+from maldump.structures import QuarEntry
 
 __author__ = 'Ladislav Baco'
 __copyright__ = 'Copyright (C) 2017'

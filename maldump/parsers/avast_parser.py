@@ -7,7 +7,7 @@ from typing import List
 
 import defusedxml.ElementTree as ET
 
-from maldump.types import Parser, QuarEntry
+from maldump.structures import Parser, QuarEntry
 from maldump.utils import xor
 
 

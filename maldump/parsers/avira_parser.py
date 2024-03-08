@@ -3,7 +3,7 @@ from hashlib import md5
 from typing import List
 
 from maldump.parsers.kaitai.avira_parser import AviraParser as KaitaiParser
-from maldump.types import QuarEntry
+from maldump.structures import QuarEntry
 
 
 class AviraParser():

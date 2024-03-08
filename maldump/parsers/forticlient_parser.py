@@ -4,7 +4,7 @@ from typing import List
 
 from maldump.parsers.kaitai.forticlient_parser import \
     ForticlientParser as KaitaiParser
-from maldump.types import QuarEntry
+from maldump.structures import QuarEntry
 
 
 class ForticlientParser():
