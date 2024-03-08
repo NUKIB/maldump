@@ -6,7 +6,7 @@ from maldump.parsers.kaitai.windef_entries import \
     WindefEntries as KaitaiParserEntries
 from maldump.parsers.kaitai.windef_resource_data import \
     WindefResourceData as KaitaiParserResourceData
-from maldump.types import QuarEntry
+from maldump.structures import QuarEntry
 
 
 class WindowsDefenderParser():

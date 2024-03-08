@@ -4,7 +4,7 @@ from typing import List
 
 from maldump.avs import (avast, avg, avira, eset, forticlient, gdata,
                          kaspersky, malwarebytes, mcafee, windef)
-from maldump.types import Quarantine
+from maldump.structures import Quarantine
 
 
 class AVManager():

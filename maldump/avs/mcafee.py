@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List
 
 from maldump.parsers.mcafee_parser import McafeeParser
-from maldump.types import Quarantine, QuarEntry
+from maldump.structures import Quarantine, QuarEntry
 
 
 class McAfee(Quarantine):
