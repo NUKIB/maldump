@@ -1,6 +1,6 @@
 Welcome to the Maldump project, and thank you for your interest in contributing to Maldump. This document will briefly explain how the project and workflow works. Please read the whole document so you have a clear picture of how everything is set up.
 
-You can join our community [discord](https://discord.gg/VYZADbrm) server to get in touch with all the funs and devs of Maldump.
+You can join our community [Discord](https://discord.gg/ktxhVRYFar) server to get in touch with all the funs and devs of Maldump.
 
 # Project structure
 
