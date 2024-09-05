@@ -123,4 +123,4 @@ To contribute to this project, please follow the [CONTRIBUTING](./CONTRIBUTING.m
 
 This software is licensed under GNU General Public License version 3.
 
-* Copyright (C) 2022 [National Cyber and Information Security Agency of the Czech Republic (NÚKIB)](https://www.nukib.cz/en/)
+* Copyright (C) 2022 [National Cyber and Information Security Agency of the Czech Republic (NÚKIB)](https://nukib.gov.cz/en/)
