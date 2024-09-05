@@ -1,0 +1,2 @@
+include maldump/parsers/kaitai/*.ksy
+
