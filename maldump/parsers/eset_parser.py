@@ -13,13 +13,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from __future__ import annotations
+
 import binascii
 import struct
 import sys
 from datetime import datetime
 from hashlib import md5
 from pathlib import Path
-from typing import List
 
 from maldump.structures import QuarEntry
 
@@ -143,19 +144,18 @@ def getRawRecords(rawData):
     return records
 
 
-def parseRecord(recordId, rawRecord):
-    record = dict()
-    record["timestamp"] = _extractTimestamp(rawRecord)
-    record["virusdb"] = _extractDataType("VirusDB", rawRecord)
-    record["obj"] = _extractDataType("Object", rawRecord)
-    record["objhash"] = _extractHashType("ObjectHash", rawRecord)
-    record["infiltration"] = _extractDataType("Infiltration", rawRecord)
-    record["user"] = _extractDataType("User", rawRecord).split("\\")[1]
-    record["progname"] = _extractDataType("ProgName", rawRecord)
-    record["proghash"] = _extractHashType("ProgHash", rawRecord)
-    record["firstseen"] = _extractFirstSeen(rawRecord)
-
-    return record
+def parseRecord(rawRecord):
+    return {
+        "timestamp": _extractTimestamp(rawRecord),
+        "virusdb": _extractDataType("VirusDB", rawRecord),
+        "obj": _extractDataType("Object", rawRecord),
+        "objhash": _extractHashType("ObjectHash", rawRecord),
+        "infiltration": _extractDataType("Infiltration", rawRecord),
+        "user": _extractDataType("User", rawRecord).split("\\")[1],
+        "progname": _extractDataType("ProgName", rawRecord),
+        "proghash": _extractHashType("ProgHash", rawRecord),
+        "firstseen": _extractFirstSeen(rawRecord),
+    }
 
 
 def mainParsing(virlog_path):
@@ -163,8 +163,8 @@ def mainParsing(virlog_path):
         virlog_data = f.read()
     rawRecords = getRawRecords(virlog_data)
     parsedRecords = []
-    for recordId, rawRecord in rawRecords:
-        parsedRecords.append(parseRecord(recordId, rawRecord))
+    for _, rawRecord in rawRecords:
+        parsedRecords.append(parseRecord(rawRecord))
 
     return parsedRecords
 
@@ -174,10 +174,10 @@ class EsetParser:
         # Quarantine folder per user
         self.quarpath = "Users/{username}/AppData/Local/ESET/ESET Security/Quarantine/"
 
-    def _decrypt(self, data):
+    def _decrypt(self, data: bytes) -> bytes:
         return bytes([((b - 84) % 256) ^ 0xA5 for b in data])
 
-    def _get_malfile(self, username, sha1):
+    def _get_malfile(self, username: str, sha1: str) -> bytes:
         quarfile = self.quarpath.format(username=username)
         quarfile = Path(quarfile) / (sha1.upper() + ".NQF")
         try:
@@ -189,7 +189,7 @@ class EsetParser:
 
         return decrypted_data
 
-    def from_file(self, name, location) -> List[QuarEntry]:
+    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
         self.name = name
         self.location = location
 
@@ -203,7 +203,7 @@ class EsetParser:
             q.path = metadata["obj"]
             q.malfile = self._get_malfile(metadata["user"], metadata["objhash"])
             q.size = len(q.malfile)
-            q.md5 = md5(q.malfile).digest().hex()
+            q.md5 = md5(q.malfile).hexdigest()
             quarfiles.append(q)
 
         return quarfiles

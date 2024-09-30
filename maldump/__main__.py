@@ -10,11 +10,14 @@ import os
 import sys
 import tarfile
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from colorama import Fore, Style, init
 
 from maldump.av_manager import AVManager
-from maldump.structures import Quarantine
+
+if TYPE_CHECKING:
+    from maldump.structures import Quarantine
 
 __version__ = "0.4.0"
 
@@ -26,7 +29,7 @@ def main() -> None:
     # Admin privileges are required for optimal function (windows only)
     if sys.platform == "win32" and not ctypes.windll.shell32.IsUserAnAdmin():
         print("Please try again with admin privileges")
-        exit(1)
+        sys.exit(1)
 
     # Save the destination directory
     dest: Path = args.dest.resolve()

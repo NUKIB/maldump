@@ -15,6 +15,5 @@ class AVG(Quarantine):
         self.location = Path("ProgramData/AVG/Antivirus/chest")
 
     def export(self) -> list[QuarEntry]:
-        quarfiles = AVGParser().from_file(name=self.name, location=self.location)
+        return AVGParser().from_file(name=self.name, location=self.location)
 
-        return quarfiles

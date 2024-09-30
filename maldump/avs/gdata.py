@@ -15,6 +15,5 @@ class GData(Quarantine):
         self.location = Path("ProgramData/G Data/AVK/Quarantine")
 
     def export(self) -> list[QuarEntry]:
-        quarfiles = GdataParser().from_file(name=self.name, location=self.location)
+        return GdataParser().from_file(name=self.name, location=self.location)
 
-        return quarfiles

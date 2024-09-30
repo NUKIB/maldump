@@ -15,8 +15,7 @@ class WindowsDefender(Quarantine):
         self.location = Path("ProgramData/Microsoft/Windows Defender/Quarantine")
 
     def export(self) -> list[QuarEntry]:
-        quarfiles = WindowsDefenderParser().from_file(
+        return WindowsDefenderParser().from_file(
             name=self.name, location=self.location
         )
 
-        return quarfiles

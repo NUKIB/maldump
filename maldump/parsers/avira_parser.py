@@ -1,13 +1,18 @@
+from __future__ import annotations
+
 from datetime import datetime as dt
 from hashlib import md5
-from typing import List
+from typing import TYPE_CHECKING
 
 from maldump.parsers.kaitai.avira_parser import AviraParser as KaitaiParser
 from maldump.structures import QuarEntry
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
 
 class AviraParser:
-    def from_file(self, name, location) -> List[QuarEntry]:
+    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
         self.name = name
         self.location = location
 
@@ -19,7 +24,7 @@ class AviraParser:
             q.threat = kt.mal_type
             q.path = kt.filename[4:]
             q.size = len(kt.mal_file)
-            q.md5 = md5(kt.mal_file).digest().hex()
+            q.md5 = md5(kt.mal_file).hexdigest()
             q.malfile = kt.mal_file
             quarfiles.append(q)
             kt.close()

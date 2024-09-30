@@ -15,6 +15,5 @@ class Avira(Quarantine):
         self.location = Path("ProgramData/Avira/Antivirus/INFECTED")
 
     def export(self) -> list[QuarEntry]:
-        quarfiles = AviraParser().from_file(name=self.name, location=self.location)
+        return AviraParser().from_file(name=self.name, location=self.location)
 
-        return quarfiles

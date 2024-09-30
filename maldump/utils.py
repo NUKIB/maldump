@@ -5,10 +5,10 @@ Convenience utils for use in avs and parsers
 from Crypto.Cipher import ARC4
 
 
-def xor(input: bytes, key: bytes) -> bytes:
-    result = bytearray(input)
+def xor(plaintext: bytes, key: bytes) -> bytes:
+    result = bytearray(plaintext)
     key_len = len(key)
-    for i in range(len(input)):
+    for i in range(len(plaintext)):
         result[i] ^= key[i % key_len]
     return bytes(result)
 

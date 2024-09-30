@@ -14,10 +14,9 @@ class Kaspersky(Quarantine):
         self.name = "Kaspersky for Windows Server"
         self.location = Path(
             "ProgramData/Kaspersky Lab/Kaspersky Security for Windows Server"
-            + "/11.0/Quarantine"
+            "/11.0/Quarantine"
         )
 
     def export(self) -> list[QuarEntry]:
-        quarfiles = KasperskyParser().from_file(name=self.name, location=self.location)
+        return KasperskyParser().from_file(name=self.name, location=self.location)
 
-        return quarfiles

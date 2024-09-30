@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from datetime import datetime as dt
-from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datetime import datetime as dt
+    from pathlib import Path
 
 
 class QuarEntry:
@@ -35,4 +38,4 @@ class Parser(ABC):
     """Abstract class describing parsers"""
 
     @abstractmethod
-    def from_file(self, name: str, location: str) -> list[QuarEntry]: ...
+    def from_file(self, name: str, location: Path) -> list[QuarEntry]: ...

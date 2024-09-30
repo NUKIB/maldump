@@ -15,6 +15,5 @@ class McAfee(Quarantine):
         self.location = Path("ProgramData/McAfee/VirusScan/Quarantine/quarantine")
 
     def export(self) -> list[QuarEntry]:
-        quarfiles = McafeeParser().from_file(name=self.name, location=self.location)
+        return McafeeParser().from_file(name=self.name, location=self.location)
 
-        return quarfiles

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, ClassVar
+
 from maldump.avs import (
     avast,
     avg,
@@ -12,13 +14,15 @@ from maldump.avs import (
     mcafee,
     windef,
 )
-from maldump.structures import Quarantine
+
+if TYPE_CHECKING:
+    from maldump.structures import Quarantine
 
 
 class AVManager:
     """Container class holding all instances"""
 
-    avs: list[Quarantine] = [
+    avs: ClassVar[list[Quarantine]] = [
         windef.WindowsDefender(),
         forticlient.FortiClient(),
         malwarebytes.Malwarebytes(),

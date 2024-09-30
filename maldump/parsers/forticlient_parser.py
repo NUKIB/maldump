@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 from datetime import datetime as dt
 from hashlib import md5
-from typing import List
+from typing import TYPE_CHECKING
 
 from maldump.parsers.kaitai.forticlient_parser import ForticlientParser as KaitaiParser
 from maldump.structures import QuarEntry
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class ForticlientParser:
@@ -15,7 +20,7 @@ class ForticlientParser:
     def _get_time(self, ts):
         return dt(ts.year, ts.month, ts.day, ts.hour, ts.minute, ts.second)
 
-    def from_file(self, name, location) -> List[QuarEntry]:
+    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
         self.name = name
         self.location = location
         quarfiles = []
@@ -27,7 +32,7 @@ class ForticlientParser:
             q.threat = kt.mal_type
             q.path = self._normalize_path(kt.mal_path)
             q.size = kt.mal_len
-            q.md5 = md5(kt.mal_file).digest().hex()
+            q.md5 = md5(kt.mal_file).hexdigest()
             q.malfile = kt.mal_file
             quarfiles.append(q)
             kt.close()

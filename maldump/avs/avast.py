@@ -15,6 +15,5 @@ class Avast(Quarantine):
         self.location = Path("ProgramData/Avast Software/Avast/chest")
 
     def export(self) -> list[QuarEntry]:
-        quarfiles = AvastParser().from_file(name=self.name, location=self.location)
+        return AvastParser().from_file(name=self.name, location=self.location)
 
-        return quarfiles

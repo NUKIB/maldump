@@ -16,6 +16,5 @@ class EsetNOD32(Quarantine):
         self.location = Path("ProgramData/ESET/ESET Security/Logs/virlog.dat")
 
     def export(self) -> list[QuarEntry]:
-        quarfiles = EsetParser().from_file(name=self.name, location=self.location)
+        return EsetParser().from_file(name=self.name, location=self.location)
 
-        return quarfiles
