@@ -1,6 +1,45 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project]
+name = "maldump"
+version = "0.4.0"
+description = "Multi-quarantine extractor"
+authors = [
+    {name = "Erik Kuna, Jež Dominik, Jonáš Novotný, Nikola Knežević"},
 ]
-build-backend = "setuptools.build_meta"
+dependencies = [
+    "colorama==0.4.6",
+    "defusedxml==0.7.1",
+    "kaitaistruct==0.10",
+    "pycryptodome==3.18.0",
+    "types-colorama==0.4.15.12",
+]
+requires-python = ">=3.7"
+readme = "README.md"
+license = {text = "GPLv3"}
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security",
+]
+
+[project.urls]
+Homepage = "https://github.com/NUKIB/maldump"
+"Bug Tracker" = "https://github.com/NUKIB/maldump/issues"
+
+[project.scripts]
+maldump = "maldump.__main__:main"
+
+[tool.pdm.dev-dependencies]
+lint = [
+    "isort>=5.11.5",
+    "mypy>=1.4.1",
+    "flake8>=1.4.1",
+    "typing>=3.7.4.3",
+]
+
+[tool.pdm]
+distribution = true
