@@ -67,3 +67,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# PDM
+node_modules/
+yarn.lock
+__pypackages__/
+.pdm-python
