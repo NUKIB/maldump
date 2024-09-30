@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 from maldump.avs import (
     avast,
     avg,

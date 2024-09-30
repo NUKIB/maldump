@@ -51,4 +51,4 @@ distribution = true
 exclude = ["maldump/parsers/kaitai"]
 
 [tool.ruff.lint]
-select = ["E", "F", "B", "UP"]
+select = ["E", "F", "B", "UP", "SIM", "I"]
