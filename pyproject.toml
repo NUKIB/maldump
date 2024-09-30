@@ -3,8 +3,8 @@ requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 [project]
+dynamic = ["version"]
 name = "maldump"
-version = "0.4.0"
 description = "Multi-quarantine extractor"
 authors = [
     {name = "Erik Kuna, Jež Dominik, Jonáš Novotný, Nikola Knežević"},
@@ -29,6 +29,10 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/NUKIB/maldump"
 "Bug Tracker" = "https://github.com/NUKIB/maldump/issues"
+
+[tool.pdm.version]
+source = "file"
+path = "maldump/__main__.py"
 
 [project.scripts]
 maldump = "maldump.__main__:main"
