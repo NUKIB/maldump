@@ -99,4 +99,5 @@ ignore = [
     "ANN102", # cls does not need annotation
     "S324", # md5 is provided as output and not used as a security measure
     "PLE0605", # pylint wrongly detects the type
+    "ISC001", # we use ruff format which recommends disabling this
 ]

@@ -16,4 +16,3 @@ class AVG(Quarantine):
 
     def export(self) -> list[QuarEntry]:
         return AVGParser().from_file(name=self.name, location=self.location)
-

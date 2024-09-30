@@ -15,7 +15,4 @@ class FortiClient(Quarantine):
         self.location = Path("Program Files/Fortinet/FortiClient/quarantine")
 
     def export(self) -> list[QuarEntry]:
-        return ForticlientParser().from_file(
-            name=self.name, location=self.location
-        )
-
+        return ForticlientParser().from_file(name=self.name, location=self.location)

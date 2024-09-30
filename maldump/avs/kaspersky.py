@@ -19,4 +19,3 @@ class Kaspersky(Quarantine):
 
     def export(self) -> list[QuarEntry]:
         return KasperskyParser().from_file(name=self.name, location=self.location)
-

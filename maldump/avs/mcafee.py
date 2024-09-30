@@ -16,4 +16,3 @@ class McAfee(Quarantine):
 
     def export(self) -> list[QuarEntry]:
         return McafeeParser().from_file(name=self.name, location=self.location)
-

@@ -16,4 +16,3 @@ class Avira(Quarantine):
 
     def export(self) -> list[QuarEntry]:
         return AviraParser().from_file(name=self.name, location=self.location)
-

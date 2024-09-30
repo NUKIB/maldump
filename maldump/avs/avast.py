@@ -16,4 +16,3 @@ class Avast(Quarantine):
 
     def export(self) -> list[QuarEntry]:
         return AvastParser().from_file(name=self.name, location=self.location)
-

@@ -27,7 +27,7 @@ class McafeeFileData(TypedDict):
 class McafeeParser:
     """XML parser"""
 
-    _zip_password = "infected" # noqa: S105
+    _zip_password = "infected"  # noqa: S105
     _re_xml = "[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}"
 
     _raw_malware = ""

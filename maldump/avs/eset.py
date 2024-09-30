@@ -17,4 +17,3 @@ class EsetNOD32(Quarantine):
 
     def export(self) -> list[QuarEntry]:
         return EsetParser().from_file(name=self.name, location=self.location)
-
