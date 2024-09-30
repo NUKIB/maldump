@@ -39,11 +39,14 @@ maldump = "maldump.__main__:main"
 
 [tool.pdm.dev-dependencies]
 lint = [
-    "isort>=5.11.5",
+    "ruff>=0.6.8",
     "mypy>=1.4.1",
-    "flake8>=1.4.1",
     "typing>=3.7.4.3",
 ]
 
 [tool.pdm]
 distribution = true
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = ["maldump/parsers/kaitai"]
