@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List
 
 from maldump.parsers.avast_parser import AvastParser
 from maldump.structures import Quarantine, QuarEntry
@@ -15,7 +14,7 @@ class Avast(Quarantine):
         self.name = "Avast"
         self.location = Path("ProgramData/Avast Software/Avast/chest")
 
-    def export(self) -> List[QuarEntry]:
+    def export(self) -> list[QuarEntry]:
         quarfiles = AvastParser().from_file(name=self.name, location=self.location)
 
         return quarfiles

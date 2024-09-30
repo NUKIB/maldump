@@ -48,5 +48,7 @@ lint = [
 distribution = true
 
 [tool.ruff]
-# Exclude a variety of commonly ignored directories.
 exclude = ["maldump/parsers/kaitai"]
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "UP"]

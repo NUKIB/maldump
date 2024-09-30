@@ -32,3 +32,10 @@ jobs:
       run: |
         pdm run ruff check
         pdm run ruff format --check
+    - name: Check typing
+      run: |
+        pdm run mypy maldump
+    - name: Run simple tests
+      run: |
+        pdm run python -m unittest
+        pdm run python -m maldump ./test/root

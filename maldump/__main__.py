@@ -10,7 +10,6 @@ import os
 import sys
 import tarfile
 from pathlib import Path
-from typing import List
 
 from colorama import Fore, Style, init
 
@@ -50,7 +49,7 @@ def main() -> None:
 
 
 def export_files(
-    avs: List[Quarantine], dest: Path, out_file: str = "quarantine.tar"
+    avs: list[Quarantine], dest: Path, out_file: str = "quarantine.tar"
 ) -> None:
     total = 0
     for av in avs:
@@ -69,7 +68,7 @@ def export_files(
 
 
 def export_meta(
-    avs: List[Quarantine], dest: Path, meta_file: str = "quarantine.csv"
+    avs: list[Quarantine], dest: Path, meta_file: str = "quarantine.csv"
 ) -> None:
     entries = []
     for av in avs:
@@ -87,7 +86,7 @@ def export_meta(
         print(f"Written {len(entries)} row(s) into file '{meta_file}'")
 
 
-def list_files(avs: List[Quarantine]) -> None:
+def list_files(avs: list[Quarantine]) -> None:
     for i, av in enumerate(avs):
         entries = av.export()
         if len(entries) > 0:

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import List
 
 from maldump.avs import (
     avast,
@@ -20,7 +19,7 @@ from maldump.structures import Quarantine
 class AVManager:
     """Container class holding all instances"""
 
-    avs: List[Quarantine] = [
+    avs: list[Quarantine] = [
         windef.WindowsDefender(),
         forticlient.FortiClient(),
         malwarebytes.Malwarebytes(),
@@ -34,6 +33,6 @@ class AVManager:
     ]
 
     @classmethod
-    def detect(cls) -> List[Quarantine]:
+    def detect(cls) -> list[Quarantine]:
         """Returns a list of avs installed on the system"""
         return [av for av in cls.avs if av.location.exists()]

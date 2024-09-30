@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List
 
 from maldump.parsers.kaspersky_parser import KasperskyParser
 from maldump.structures import Quarantine, QuarEntry
@@ -18,7 +17,7 @@ class Kaspersky(Quarantine):
             + "/11.0/Quarantine"
         )
 
-    def export(self) -> List[QuarEntry]:
+    def export(self) -> list[QuarEntry]:
         quarfiles = KasperskyParser().from_file(name=self.name, location=self.location)
 
         return quarfiles

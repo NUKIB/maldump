@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List
 
 from maldump.parsers.avg_parser import AVGParser
 from maldump.structures import Quarantine, QuarEntry
@@ -15,7 +14,7 @@ class AVG(Quarantine):
         self.name = "AVG"
         self.location = Path("ProgramData/AVG/Antivirus/chest")
 
-    def export(self) -> List[QuarEntry]:
+    def export(self) -> list[QuarEntry]:
         quarfiles = AVGParser().from_file(name=self.name, location=self.location)
 
         return quarfiles

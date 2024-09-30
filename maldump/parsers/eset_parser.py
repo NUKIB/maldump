@@ -81,7 +81,8 @@ def _extractDataType(dataType, rawRecord):
         return ""
     if rawRecord[dataOffset + 6 : dataOffset + 8] != NULL:
         _warningUnexpected(dataType)
-    # find NULL char, but search for (\x00)*3, because third zero byte is part of last widechar
+    # find NULL char, but search for (\x00)*3, because third zero byte is part of
+    # last widechar
     dataEnd = dataOffset + 8 + 1 + rawRecord[dataOffset + 8 :].find(b"\x00" + NULL)
     dataWideChar = rawRecord[dataOffset + 8 : dataEnd]
     return dataWideChar.decode("utf-16")
@@ -183,7 +184,7 @@ class EsetParser:
             with open(quarfile, "rb") as f:
                 data = f.read()
                 decrypted_data = self._decrypt(data)
-        except IOError:
+        except OSError:
             print("Eset Error: could not read file", quarfile)
 
         return decrypted_data

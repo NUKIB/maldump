@@ -13,7 +13,7 @@ def xor(input: bytes, key: bytes) -> bytes:
     return bytes(result)
 
 
-class CustomArc4(object):
+class CustomArc4:
     def __init__(self, key: bytes) -> None:
         self.key = bytes(key)
 
