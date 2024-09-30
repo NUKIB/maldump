@@ -12,13 +12,10 @@ class Avast(Quarantine):
 
     def __init__(self) -> None:
         super().__init__()
-        self.name = 'Avast'
-        self.location = Path('ProgramData/Avast Software/Avast/chest')
+        self.name = "Avast"
+        self.location = Path("ProgramData/Avast Software/Avast/chest")
 
     def export(self) -> List[QuarEntry]:
-        quarfiles = AvastParser().from_file(
-            name=self.name,
-            location=self.location
-        )
+        quarfiles = AvastParser().from_file(name=self.name, location=self.location)
 
         return quarfiles

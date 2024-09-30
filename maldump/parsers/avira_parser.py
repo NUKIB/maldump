@@ -6,14 +6,13 @@ from maldump.parsers.kaitai.avira_parser import AviraParser as KaitaiParser
 from maldump.structures import QuarEntry
 
 
-class AviraParser():
-
+class AviraParser:
     def from_file(self, name, location) -> List[QuarEntry]:
         self.name = name
         self.location = location
 
         quarfiles = []
-        for metafile in self.location.glob('*.qua'):
+        for metafile in self.location.glob("*.qua"):
             kt = KaitaiParser.from_file(metafile)
             q = QuarEntry()
             q.timestamp = dt.fromtimestamp(kt.qua_time)

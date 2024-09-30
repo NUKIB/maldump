@@ -12,14 +12,10 @@ class McAfee(Quarantine):
 
     def __init__(self) -> None:
         super().__init__()
-        self.name = 'McAfee'
-        self.location = Path(
-            'ProgramData/McAfee/VirusScan/Quarantine/quarantine')
+        self.name = "McAfee"
+        self.location = Path("ProgramData/McAfee/VirusScan/Quarantine/quarantine")
 
     def export(self) -> List[QuarEntry]:
-        quarfiles = McafeeParser().from_file(
-            name=self.name,
-            location=self.location
-        )
+        quarfiles = McafeeParser().from_file(name=self.name, location=self.location)
 
         return quarfiles

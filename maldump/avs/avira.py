@@ -12,13 +12,10 @@ class Avira(Quarantine):
 
     def __init__(self) -> None:
         super().__init__()
-        self.name = 'Avira'
-        self.location = Path('ProgramData/Avira/Antivirus/INFECTED')
+        self.name = "Avira"
+        self.location = Path("ProgramData/Avira/Antivirus/INFECTED")
 
     def export(self) -> List[QuarEntry]:
-        quarfiles = AviraParser().from_file(
-            name=self.name,
-            location=self.location
-        )
+        quarfiles = AviraParser().from_file(name=self.name, location=self.location)
 
         return quarfiles

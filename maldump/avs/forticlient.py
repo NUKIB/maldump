@@ -12,13 +12,12 @@ class FortiClient(Quarantine):
 
     def __init__(self) -> None:
         super().__init__()
-        self.name = 'FortiClient'
-        self.location = Path('Program Files/Fortinet/FortiClient/quarantine')
+        self.name = "FortiClient"
+        self.location = Path("Program Files/Fortinet/FortiClient/quarantine")
 
     def export(self) -> List[QuarEntry]:
         quarfiles = ForticlientParser().from_file(
-            name=self.name,
-            location=self.location
+            name=self.name, location=self.location
         )
 
         return quarfiles

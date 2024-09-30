@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List
 
 
-class QuarEntry():
+class QuarEntry:
     timestamp: dt
     threat: str
     path: str

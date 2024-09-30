@@ -1,5 +1,5 @@
 """
-    Convenience utils for use in avs and parsers
+Convenience utils for use in avs and parsers
 """
 
 from Crypto.Cipher import ARC4

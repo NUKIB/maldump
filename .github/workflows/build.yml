@@ -28,7 +28,7 @@ jobs:
     - name: Install dependencies
       run: |
         pdm sync
-    - name: Lint with flake8
+    - name: Run checks with ruff
       run: |
         pdm run ruff check
         pdm run ruff format --check

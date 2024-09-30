@@ -6,14 +6,13 @@ from maldump.parsers.kaitai.gdata_parser import GdataParser as KaitaiParser
 from maldump.structures import QuarEntry
 
 
-class GdataParser():
-
+class GdataParser:
     def from_file(self, name, location) -> List[QuarEntry]:
         self.name = name
         self.location = location
         quarfiles = []
 
-        for metafile in self.location.glob('*.q'):
+        for metafile in self.location.glob("*.q"):
             kt = KaitaiParser.from_file(metafile)
 
             q = QuarEntry()

@@ -7,8 +7,7 @@ from maldump.structures import QuarEntry
 from maldump.utils import xor
 
 
-class KasperskyParser():
-
+class KasperskyParser:
     def _normalize_time(self, number):
         year = (number >> 48) & 0xFFFF
         month = (number >> 40) & 0xFF
@@ -22,7 +21,7 @@ class KasperskyParser():
     def _get_malfile(self, data):
         file = self.location / data
         key = [0xE2, 0x45, 0x48, 0xEC, 0x69, 0x0E, 0x5C, 0xAC]
-        with open(file, 'rb') as f:
+        with open(file, "rb") as f:
             return xor(f.read(), key)
 
     def from_file(self, name, location) -> List[QuarEntry]:
@@ -31,14 +30,12 @@ class KasperskyParser():
         quarfiles = []
 
         try:
-            conn = sqlite3.connect(
-                self.location.joinpath('quarantine.db').resolve()
-            )
+            conn = sqlite3.connect(self.location.joinpath("quarantine.db").resolve())
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM 'objects'")
             rows = cursor.fetchall()
         except Exception as e:
-            print('Kaspersky DB Error: ' + str(e))
+            print("Kaspersky DB Error: " + str(e))
 
         for row in rows:
             malfile = self._get_malfile(row[0])

@@ -12,16 +12,13 @@ class Kaspersky(Quarantine):
 
     def __init__(self) -> None:
         super().__init__()
-        self.name = 'Kaspersky for Windows Server'
+        self.name = "Kaspersky for Windows Server"
         self.location = Path(
-            'ProgramData/Kaspersky Lab/Kaspersky Security for Windows Server' +
-            '/11.0/Quarantine'
+            "ProgramData/Kaspersky Lab/Kaspersky Security for Windows Server"
+            + "/11.0/Quarantine"
         )
 
     def export(self) -> List[QuarEntry]:
-        quarfiles = KasperskyParser().from_file(
-            name=self.name,
-            location=self.location
-        )
+        quarfiles = KasperskyParser().from_file(name=self.name, location=self.location)
 
         return quarfiles

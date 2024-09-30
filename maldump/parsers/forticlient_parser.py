@@ -2,15 +2,13 @@ from datetime import datetime as dt
 from hashlib import md5
 from typing import List
 
-from maldump.parsers.kaitai.forticlient_parser import \
-    ForticlientParser as KaitaiParser
+from maldump.parsers.kaitai.forticlient_parser import ForticlientParser as KaitaiParser
 from maldump.structures import QuarEntry
 
 
-class ForticlientParser():
-
+class ForticlientParser:
     def _normalize_path(self, path):
-        if path[2:4] == '?\\':
+        if path[2:4] == "?\\":
             path = path[4:]
         return path
 
@@ -22,7 +20,7 @@ class ForticlientParser():
         self.location = location
         quarfiles = []
 
-        for metafile in self.location.glob('*[!.meta]'):
+        for metafile in self.location.glob("*[!.meta]"):
             kt = KaitaiParser.from_file(metafile)
             q = QuarEntry()
             q.timestamp = self._get_time(kt.timestamp)

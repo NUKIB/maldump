@@ -12,13 +12,10 @@ class AVG(Quarantine):
 
     def __init__(self) -> None:
         super().__init__()
-        self.name = 'AVG'
-        self.location = Path('ProgramData/AVG/Antivirus/chest')
+        self.name = "AVG"
+        self.location = Path("ProgramData/AVG/Antivirus/chest")
 
     def export(self) -> List[QuarEntry]:
-        quarfiles = AVGParser().from_file(
-            name=self.name,
-            location=self.location
-        )
+        quarfiles = AVGParser().from_file(name=self.name, location=self.location)
 
         return quarfiles

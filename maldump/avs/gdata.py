@@ -12,13 +12,10 @@ class GData(Quarantine):
 
     def __init__(self) -> None:
         super().__init__()
-        self.name = 'G Data'
-        self.location = Path('ProgramData/G Data/AVK/Quarantine')
+        self.name = "G Data"
+        self.location = Path("ProgramData/G Data/AVK/Quarantine")
 
     def export(self) -> List[QuarEntry]:
-        quarfiles = GdataParser().from_file(
-            name=self.name,
-            location=self.location
-        )
+        quarfiles = GdataParser().from_file(name=self.name, location=self.location)
 
         return quarfiles
