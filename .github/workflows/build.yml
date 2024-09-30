@@ -42,5 +42,5 @@ jobs:
         pdm run mypy maldump
     - name: Run simple tests
       run: |
-        python -m unittest
-        python -m maldump ./test/root
+        pdm run python -m unittest
+        pdm run python -m maldump ./test/root
