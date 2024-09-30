@@ -1,15 +1,28 @@
 from __future__ import annotations
 
-from typing import List
+from typing import TYPE_CHECKING, ClassVar
 
-from maldump.avs import (avast, avg, avira, eset, forticlient, gdata,
-                         kaspersky, malwarebytes, mcafee, windef)
-from maldump.structures import Quarantine
+from maldump.avs import (
+    avast,
+    avg,
+    avira,
+    eset,
+    forticlient,
+    gdata,
+    kaspersky,
+    malwarebytes,
+    mcafee,
+    windef,
+)
+
+if TYPE_CHECKING:
+    from maldump.structures import Quarantine
 
 
-class AVManager():
+class AVManager:
     """Container class holding all instances"""
-    avs: List[Quarantine] = [
+
+    avs: ClassVar[list[Quarantine]] = [
         windef.WindowsDefender(),
         forticlient.FortiClient(),
         malwarebytes.Malwarebytes(),
@@ -19,10 +32,10 @@ class AVManager():
         kaspersky.Kaspersky(),
         eset.EsetNOD32(),
         mcafee.McAfee(),
-        avg.AVG()
+        avg.AVG(),
     ]
 
     @classmethod
-    def detect(cls) -> List[Quarantine]:
+    def detect(cls) -> list[Quarantine]:
         """Returns a list of avs installed on the system"""
         return [av for av in cls.avs if av.location.exists()]

@@ -39,11 +39,65 @@ maldump = "maldump.__main__:main"
 
 [tool.pdm.dev-dependencies]
 lint = [
-    "isort>=5.11.5",
+    "ruff>=0.6.8",
     "mypy>=1.4.1",
-    "flake8>=1.4.1",
     "typing>=3.7.4.3",
 ]
 
 [tool.pdm]
 distribution = true
+
+[tool.ruff]
+exclude = ["maldump/parsers/kaitai"]
+
+[tool.ruff.lint]
+# TODO: N, ANN, DTZ
+select = [
+    "E",
+    "F",
+    "W",
+    "C90",
+    "I",
+    "UP",
+    "YTT",
+    "ASYNC",
+    "S",
+    "BLE",
+    "FBT",
+    "B",
+    "A",
+    "C4",
+    "T10",
+    "EM",
+    "FA",
+    "ISC",
+    "ICN",
+    "LOG",
+    "G",
+    "INP",
+    "PIE",
+    "PYI",
+    "Q",
+    "RSE",
+    "RET",
+    "SLF",
+    "SLOT",
+    "SIM",
+    "TID",
+    "TCH",
+    "INT",
+    "ARG",
+    "PL",
+    "TRY",
+    "FLY",
+    "PERF",
+    "FURB",
+    "RUF",
+]
+ignore = [
+    "ANN101", # self does not need annotation
+    "ANN102", # cls does not need annotation
+    "S324", # md5 is provided as output and not used as a security measure
+    "PLE0605", # pylint wrongly detects the type
+    "ISC001", # we use ruff format which recommends disabling this
+]

@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from datetime import datetime as dt
-from pathlib import Path
-from typing import List
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datetime import datetime as dt
+    from pathlib import Path
 
 
-class QuarEntry():
+class QuarEntry:
     timestamp: dt
     threat: str
     path: str
@@ -25,14 +27,15 @@ class Quarantine(ABC):
     # Absolute location of the quarantine folder
     location: Path
 
+    @abstractmethod
     def __init__(self) -> None: ...
 
     @abstractmethod
-    def export(self) -> List[QuarEntry]: ...
+    def export(self) -> list[QuarEntry]: ...
 
 
 class Parser(ABC):
     """Abstract class describing parsers"""
 
     @abstractmethod
-    def from_file(self, name: str, location: str) -> List[QuarEntry]: ...
+    def from_file(self, name: str, location: Path) -> list[QuarEntry]: ...
