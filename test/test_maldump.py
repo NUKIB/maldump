@@ -36,6 +36,19 @@ class TestExport(unittest.TestCase):
             for entry in av:
                 self.assertEqual(entry.md5, "44d88612fea8a8f36de82e1278abb02f")
 
+    def test_sha1_hash(self) -> None:
+        for av in self.avs:
+            for entry in av:
+                self.assertEqual(entry.sha1, "3395856ce81f2b7382dee72602f798b642f14140")
+
+    def test_sha256_hash(self) -> None:
+        for av in self.avs:
+            for entry in av:
+                self.assertEqual(
+                    entry.sha256,
+                    "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f",
+                )
+
     def test_file_is_eicar(self) -> None:
         for av in self.avs:
             for entry in av:

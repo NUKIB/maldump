@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime as dt
-from hashlib import md5
 from typing import TYPE_CHECKING
 
 from maldump.parsers.kaitai.avira_parser import AviraParser as KaitaiParser
@@ -23,8 +22,6 @@ class AviraParser:
             q.timestamp = dt.fromtimestamp(kt.qua_time)
             q.threat = kt.mal_type
             q.path = kt.filename[4:]
-            q.size = len(kt.mal_file)
-            q.md5 = md5(kt.mal_file).hexdigest()
             q.malfile = kt.mal_file
             quarfiles.append(q)
             kt.close()

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime as dt
-from hashlib import md5
 from typing import TYPE_CHECKING
 
 from maldump.parsers.kaitai.windef_entries import WindefEntries as KaitaiParserEntries
@@ -47,8 +46,6 @@ class WindowsDefenderParser:
                     q.timestamp = ts
                     q.threat = kt.data1.mal_type
                     q.path = self._normalize(e.entry.path.character)
-                    q.size = len(malfile)
-                    q.md5 = md5(malfile).hexdigest()
                     q.malfile = malfile
                     quarfiles.append(q)
             kt.close()
