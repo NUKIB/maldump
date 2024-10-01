@@ -19,7 +19,7 @@ from maldump.av_manager import AVManager
 if TYPE_CHECKING:
     from maldump.structures import Quarantine
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 
 def main() -> None:
@@ -68,6 +68,8 @@ def export_files(
             tar.close()
     if total > 0:
         print(f"Exported {total} object(s) into '{out_file}'")
+    else:
+        print("No quarantined files found!")
 
 
 def export_meta(
@@ -82,22 +84,39 @@ def export_meta(
     if len(entries) > 0:
         csv_path = dest.joinpath(meta_file)
         with open(csv_path, "w", encoding="utf-8", newline="") as f:
-            fields = ["timestamp", "antivirus", "threat", "path", "size", "md5"]
+            fields = [
+                "timestamp",
+                "antivirus",
+                "threat",
+                "path",
+                "size",
+                "md5",
+                "sha1",
+                "sha256",
+            ]
             writer = csv.DictWriter(f, fields, extrasaction="ignore")
             writer.writeheader()
             writer.writerows(entries)
         print(f"Written {len(entries)} row(s) into file '{meta_file}'")
+    else:
+        print(
+            f"The file '{meta_file}' wasn't created as there is nothing in quarantine"
+        )
 
 
 def list_files(avs: list[Quarantine]) -> None:
+    quarantined_file_exists = False
     for i, av in enumerate(avs):
         entries = av.export()
         if len(entries) > 0:
+            quarantined_file_exists = True
             if i != 0:
                 print()
             print(Fore.YELLOW + "---", av.name, "---" + Style.RESET_ALL)
             for e in entries:
                 print(e.path)
+    if not quarantined_file_exists:
+        print("No quarantined files found!")
 
 
 def parse_cli() -> argparse.Namespace:

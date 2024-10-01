@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import sqlite3
 from datetime import datetime
-from hashlib import md5
 from typing import TYPE_CHECKING
 
 from maldump.structures import QuarEntry
@@ -49,7 +48,6 @@ class KasperskyParser:
             q.threat = row[3]
             q.path = row[1] + row[2]
             q.size = row[7]
-            q.md5 = md5(malfile).hexdigest()
             q.malfile = malfile
             quarfiles.append(q)
 

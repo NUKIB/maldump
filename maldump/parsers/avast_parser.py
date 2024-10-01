@@ -3,7 +3,6 @@ from __future__ import annotations
 import sqlite3
 import tempfile
 from datetime import datetime as dt
-from hashlib import md5
 from os import unlink
 from typing import TYPE_CHECKING
 
@@ -85,8 +84,6 @@ class AvastParser(Parser):
             q.timestamp = dt.fromtimestamp(int(get(e, "TransferTime")))
             q.threat = get(e, "Virus")
             q.path = path
-            q.size = len(malfile)
-            q.md5 = md5(malfile).hexdigest()
             q.malfile = malfile
 
             quarfiles.append(q)

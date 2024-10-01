@@ -19,7 +19,6 @@ import binascii
 import struct
 import sys
 from datetime import datetime
-from hashlib import md5
 from pathlib import Path
 
 from maldump.structures import QuarEntry
@@ -202,8 +201,6 @@ class EsetParser:
             q.threat = metadata["infiltration"]
             q.path = metadata["obj"]
             q.malfile = self._get_malfile(metadata["user"], metadata["objhash"])
-            q.size = len(q.malfile)
-            q.md5 = md5(q.malfile).hexdigest()
             quarfiles.append(q)
 
         return quarfiles

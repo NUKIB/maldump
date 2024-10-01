@@ -4,7 +4,6 @@ import re
 import sys
 import zipfile
 from datetime import datetime as dt
-from hashlib import md5
 from typing import TYPE_CHECKING, TypedDict
 from zipfile import ZipFile
 
@@ -45,7 +44,6 @@ class McafeeParser:
             q.threat = parser["threat"]
             q.path = parser["file_name"]
             q.size = int(parser["size"])
-            q.md5 = md5(parser["mal_file"]).hexdigest()
             q.malfile = parser["mal_file"]
             quarfiles.append(q)
 
