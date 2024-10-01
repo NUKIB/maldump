@@ -13,7 +13,7 @@ dependencies = [
     "colorama==0.4.6",
     "defusedxml==0.7.1",
     "kaitaistruct==0.10",
-    "pycryptodome==3.20.0",
+    "arc4==0.4.0",
     "types-colorama==0.4.15.12",
 ]
 requires-python = ">=3.8"

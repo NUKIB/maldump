@@ -5,10 +5,37 @@
 groups = ["default", "lint"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:17370b283727b0b93d278f70e92fedec97fe0278b437ef6a6a0faab2389873a0"
+content_hash = "sha256:bc00e59127ba01521bbf7b5726d076f1f127f03c3d7d82f7a34309e5051e90d6"
 
 [[metadata.targets]]
 requires_python = ">=3.8"
+
+[[package]]
+name = "arc4"
+version = "0.4.0"
+summary = "A small and insanely fast ARCFOUR (RC4) cipher implementation of Python"
+groups = ["default"]
+files = [
+    {file = "arc4-0.4.0-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:d27d6cb7fef8787c3cb91c06a6adb2315551f42af3b4142d45703d5303e6ad2b"},
+    {file = "arc4-0.4.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:f20540dd6ab695e6d1205a5edb4df416688ef39242cbbec4ad0b534e38ffe55f"},
+    {file = "arc4-0.4.0-cp310-cp310-win_amd64.whl", hash = "sha256:cd9c4fc470019e184f72aacc5fdcb2a3364e7c174aaa6de2486ca18e9d377a5d"},
+    {file = "arc4-0.4.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:3cdae371789b621927866a1b10862ea20dbe519b1b86cb725ff2dd95525c704f"},
+    {file = "arc4-0.4.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:c0b9adcf7ab7ef7ca0ab60cf7e2dd8886fbc6610471ea9a8c7fb34416265451c"},
+    {file = "arc4-0.4.0-cp311-cp311-win_amd64.whl", hash = "sha256:9b9d14ed487f373c0d47b97262a3f26d6f03e725d640c4c230a51f5f3dd8a6b4"},
+    {file = "arc4-0.4.0-cp38-cp38-macosx_10_15_x86_64.whl", hash = "sha256:2104d551744e9b851a12c144b512244da224ab4f5f68ed28a45a599937ead1cd"},
+    {file = "arc4-0.4.0-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:62ed00203dee645d99422a1dc1efdd5ca108048e8c047a239c3be0a690f6abb6"},
+    {file = "arc4-0.4.0-cp38-cp38-win_amd64.whl", hash = "sha256:eb5eb33e3c68d68c548355aead25843502d3d1b909fa2e3b3f2520d467708af5"},
+    {file = "arc4-0.4.0-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:779d1b53c75e66edd023b9240dbd00df7b241ab50b6a4ea86ab97117dbbff86f"},
+    {file = "arc4-0.4.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:b935c41b8691001b6a6746c2611a0a76962720a83688501dac8f3c74f9db4f34"},
+    {file = "arc4-0.4.0-cp39-cp39-win_amd64.whl", hash = "sha256:f419c08cfb2cc8f374725a76dd8fd40d87b6a0e236774cb3307f2f51f6794c1f"},
+    {file = "arc4-0.4.0-pp38-pypy38_pp73-macosx_10_9_x86_64.whl", hash = "sha256:b1c72ceaff1b366d25ca5945ed381a520a8116195b7a4b0a69aaccac3f00d7ae"},
+    {file = "arc4-0.4.0-pp38-pypy38_pp73-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:9954ee25a0687b1076791ae92cacb20c152fad2bf5bdac608f4c9472d76e83f0"},
+    {file = "arc4-0.4.0-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:15603d81bbb990038dfe7f7a424d16549161b2d5c1e216097cb065023895f398"},
+    {file = "arc4-0.4.0-pp39-pypy39_pp73-macosx_10_9_x86_64.whl", hash = "sha256:516e4fb4543e2a7c958b6fffb7658ba905b25b30af387b54c872418d87192fe6"},
+    {file = "arc4-0.4.0-pp39-pypy39_pp73-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:8e5137eeb8f4c6f0c3bd23731c58359d554722b08119156058c99c337e78adb0"},
+    {file = "arc4-0.4.0-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:3da0dd7b6dd38c71af105aebef42bf587a624a0b26231717f1dcc53f36ab14d6"},
+    {file = "arc4-0.4.0.tar.gz", hash = "sha256:d431b53d11b24d62521dbbd06d755bf9d6d11a03cc7bbbdf37a13a12ee0747b6"},
+]
 
 [[package]]
 name = "colorama"
@@ -96,34 +123,6 @@ groups = ["lint"]
 files = [
     {file = "mypy_extensions-1.0.0-py3-none-any.whl", hash = "sha256:4392f6c0eb8a5668a69e23d168ffa70f0be9ccfd32b5cc2d26a34ae5b844552d"},
     {file = "mypy_extensions-1.0.0.tar.gz", hash = "sha256:75dbf8955dc00442a438fc4d0666508a9a97b6bd41aa2f0ffe9d2f2725af0782"},
-]
-
-[[package]]
-name = "pycryptodome"
-version = "3.20.0"
-requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-summary = "Cryptographic library for Python"
-groups = ["default"]
-files = [
-    {file = "pycryptodome-3.20.0-cp35-abi3-macosx_10_9_universal2.whl", hash = "sha256:ac1c7c0624a862f2e53438a15c9259d1655325fc2ec4392e66dc46cdae24d044"},
-    {file = "pycryptodome-3.20.0-cp35-abi3-macosx_10_9_x86_64.whl", hash = "sha256:76658f0d942051d12a9bd08ca1b6b34fd762a8ee4240984f7c06ddfb55eaf15a"},
-    {file = "pycryptodome-3.20.0-cp35-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f35d6cee81fa145333137009d9c8ba90951d7d77b67c79cbe5f03c7eb74d8fe2"},
-    {file = "pycryptodome-3.20.0-cp35-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:76cb39afede7055127e35a444c1c041d2e8d2f1f9c121ecef573757ba4cd2c3c"},
-    {file = "pycryptodome-3.20.0-cp35-abi3-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:49a4c4dc60b78ec41d2afa392491d788c2e06edf48580fbfb0dd0f828af49d25"},
-    {file = "pycryptodome-3.20.0-cp35-abi3-musllinux_1_1_aarch64.whl", hash = "sha256:fb3b87461fa35afa19c971b0a2b7456a7b1db7b4eba9a8424666104925b78128"},
-    {file = "pycryptodome-3.20.0-cp35-abi3-musllinux_1_1_i686.whl", hash = "sha256:acc2614e2e5346a4a4eab6e199203034924313626f9620b7b4b38e9ad74b7e0c"},
-    {file = "pycryptodome-3.20.0-cp35-abi3-musllinux_1_1_x86_64.whl", hash = "sha256:210ba1b647837bfc42dd5a813cdecb5b86193ae11a3f5d972b9a0ae2c7e9e4b4"},
-    {file = "pycryptodome-3.20.0-cp35-abi3-win32.whl", hash = "sha256:8d6b98d0d83d21fb757a182d52940d028564efe8147baa9ce0f38d057104ae72"},
-    {file = "pycryptodome-3.20.0-cp35-abi3-win_amd64.whl", hash = "sha256:9b3ae153c89a480a0ec402e23db8d8d84a3833b65fa4b15b81b83be9d637aab9"},
-    {file = "pycryptodome-3.20.0-pp310-pypy310_pp73-macosx_10_9_x86_64.whl", hash = "sha256:acae12b9ede49f38eb0ef76fdec2df2e94aad85ae46ec85be3648a57f0a7db04"},
-    {file = "pycryptodome-3.20.0-pp310-pypy310_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f47888542a0633baff535a04726948e876bf1ed880fddb7c10a736fa99146ab3"},
-    {file = "pycryptodome-3.20.0-pp310-pypy310_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:6e0e4a987d38cfc2e71b4a1b591bae4891eeabe5fa0f56154f576e26287bfdea"},
-    {file = "pycryptodome-3.20.0-pp310-pypy310_pp73-win_amd64.whl", hash = "sha256:c18b381553638414b38705f07d1ef0a7cf301bc78a5f9bc17a957eb19446834b"},
-    {file = "pycryptodome-3.20.0-pp39-pypy39_pp73-macosx_10_9_x86_64.whl", hash = "sha256:a60fedd2b37b4cb11ccb5d0399efe26db9e0dd149016c1cc6c8161974ceac2d6"},
-    {file = "pycryptodome-3.20.0-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:405002eafad114a2f9a930f5db65feef7b53c4784495dd8758069b89baf68eab"},
-    {file = "pycryptodome-3.20.0-pp39-pypy39_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:2ab6ab0cb755154ad14e507d1df72de9897e99fd2d4922851a276ccc14f4f1a5"},
-    {file = "pycryptodome-3.20.0-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:acf6e43fa75aca2d33e93409f2dafe386fe051818ee79ee8a3e21de9caa2ac9e"},
-    {file = "pycryptodome-3.20.0.tar.gz", hash = "sha256:09609209ed7de61c2b560cc5c8c4fbf892f8b15b1faf7e4cbffac97db1fffda7"},
 ]
 
 [[package]]

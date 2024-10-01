@@ -2,7 +2,7 @@
 Convenience utils for use in avs and parsers
 """
 
-from Crypto.Cipher import ARC4
+from arc4 import ARC4
 
 
 def xor(plaintext: bytes, key: bytes) -> bytes:
@@ -18,5 +18,5 @@ class CustomArc4:
         self.key = bytes(key)
 
     def decode(self, plaintext: bytes) -> bytes:
-        cipher = ARC4.new(self.key)
+        cipher = ARC4(self.key)
         return cipher.decrypt(plaintext)
