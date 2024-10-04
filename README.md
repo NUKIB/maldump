@@ -19,38 +19,26 @@ Supports extraction from the following AV products
   * McAfee
   * AVG
 
-## Installation
+## Usage & installation
 
-Using pip (Recommended)
+In order to use maldump, you can:
+- Download the latest binaries from [releases](https://github.com/NUKIB/maldump/releases) (recommended).
+- Install using pip.
+- Install using git & [PDM](https://pdm-project.org/en/latest/) (for development).
+
+### Using pip
 
 ```bash
-$ pip install maldump
+pip install maldump
 ```
 
-Or alternatively using git and Virtual Environment
+### Using git & PDM
 
 ```
-$ git clone https://github.com/NUKIB/maldump
-$ cd maldump
-```
-
-Create new environment and activate it
-
-```
-$ python3 -m venv venv
-$ . venv/bin/activate
-```
-
-Install dependencies
-
-```
-(env) $ pip install -r requirements.txt
-```
-
-Run it as a module
-
-```
-(env) $ python3 -m maldump
+git clone https://github.com/NUKIB/maldump
+cd maldump
+pdm install
+pdm run python -m maldump
 ```
 
 ## Usage
@@ -80,25 +68,25 @@ optional arguments:
 List quarantine files located on disk C
 
 ```
-$ maldump C:\
+maldump C:\
 ```
 
 Dump quarantine files from disk C into archive `quarantine.tar`
 
 ```
-$ maldump C:\ --quar
+maldump C:\ --quar
 ```
 
 Export quarantine metadata from disk C into `quarantine.csv`
 
 ```
-$ maldump C:\ --meta
+maldump C:\ --meta
 ```
 
 Export both files and metadata from a mounted disk F
 
 ```
-$ maldump F:\ --all
+maldump F:\ --all
 ```
 
 ### On Linux
@@ -106,7 +94,7 @@ $ maldump F:\ --all
 List quarantine files from a windows partition mounted on `/mnt/win`
 
 ```
-$ maldump /mnt/win
+maldump /mnt/win
 ```
 
 ## Disclaimer
