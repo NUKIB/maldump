@@ -8,14 +8,14 @@ from typing import TYPE_CHECKING
 
 import defusedxml.ElementTree as ET
 
-from maldump.structures import QuarEntry
+from maldump.structures import QuarEntry, Parser
 from maldump.utils import xor
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
-class AVGParser:
+class AVGParser(Parser):
     # Cleanup
     def __del__(self):
         if hasattr(self, "db"):
@@ -64,7 +64,7 @@ class AVGParser:
         self.location = location
 
         self._initDB()
-        quarfiles = []
+        quarfiles = {}
 
         # Return the value of a field 'f'
         def get(e, f):
@@ -86,6 +86,23 @@ class AVGParser:
             q.path = path
             q.malfile = malfile
 
-            quarfiles.append(q)
+            quarfiles[chest_id] = q
 
-        return quarfiles
+        # iterating over bigger files, which were not logged to vault.db
+        for entry in self.location.glob("*"):
+            chest_id = entry.name
+
+            if chest_id == "index.xml":
+                continue
+
+            if chest_id in quarfiles:
+                continue
+
+            malfile = self._getRawFromFile(chest_id)
+
+            q = QuarEntry()
+            q.path = str(entry)
+            q.malfile = malfile
+            quarfiles[chest_id] = q
+
+        return list(quarfiles.values())
