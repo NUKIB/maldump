@@ -4,13 +4,13 @@ from datetime import datetime as dt
 from typing import TYPE_CHECKING
 
 from maldump.parsers.kaitai.gdata_parser import GdataParser as KaitaiParser
-from maldump.structures import QuarEntry
+from maldump.structures import QuarEntry, Parser
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
-class GdataParser:
+class GdataParser(Parser):
     def from_file(self, name: str, location: Path) -> list[QuarEntry]:
         self.name = name
         self.location = location

@@ -9,7 +9,7 @@ from zipfile import ZipFile
 
 import defusedxml.ElementTree as ET
 
-from maldump.structures import QuarEntry
+from maldump.structures import QuarEntry, Parser
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -23,7 +23,7 @@ class McafeeFileData(TypedDict):
     mal_file: bytes
 
 
-class McafeeParser:
+class McafeeParser(Parser):
     """XML parser"""
 
     _zip_password = "infected"  # noqa: S105

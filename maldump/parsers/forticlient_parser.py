@@ -4,13 +4,13 @@ from datetime import datetime as dt
 from typing import TYPE_CHECKING
 
 from maldump.parsers.kaitai.forticlient_parser import ForticlientParser as KaitaiParser
-from maldump.structures import QuarEntry
+from maldump.structures import QuarEntry, Parser
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
-class ForticlientParser:
+class ForticlientParser(Parser):
     def _normalize_path(self, path):
         if path[2:4] == "?\\":
             path = path[4:]
