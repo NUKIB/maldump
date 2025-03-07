@@ -16,12 +16,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import annotations
 
 import binascii
+import os
+import re
 import struct
 import sys
 from datetime import datetime
 from pathlib import Path
 
-from maldump.structures import QuarEntry
+from maldump.structures import QuarEntry, Parser
 
 __author__ = "Ladislav Baco"
 __copyright__ = "Copyright (C) 2017"
@@ -168,7 +170,7 @@ def mainParsing(virlog_path):
     return parsedRecords
 
 
-class EsetParser:
+class EsetParser(Parser):
     def __init__(self):
         # Quarantine folder per user
         self.quarpath = "Users/{username}/AppData/Local/ESET/ESET Security/Quarantine/"
@@ -192,7 +194,14 @@ class EsetParser:
         self.name = name
         self.location = location
 
-        quarfiles = []
+        quarfiles: dict[tuple[str, datetime], QuarEntry] = {}
+        active_users = set()
+
+        actual_login = os.getlogin()
+        user_path = self.quarpath.format(username=actual_login)
+        if os.path.exists(user_path):
+            active_users.add(actual_login)
+
         for metadata in mainParsing(self.location):
             if metadata["user"] == "SYSTEM":
                 continue
@@ -201,6 +210,28 @@ class EsetParser:
             q.threat = metadata["infiltration"]
             q.path = metadata["obj"]
             q.malfile = self._get_malfile(metadata["user"], metadata["objhash"])
-            quarfiles.append(q)
+            quarfiles[q.sha1, metadata["user"]] = q
 
-        return quarfiles
+            active_users.add(metadata["user"])
+
+        regex = re.compile(r"([0-9a-fA-F]+)\.NQF$")
+
+        for user in active_users:
+            for entry in os.listdir(self.quarpath.format(username=user)):
+                res = re.match(regex, entry)
+
+                if not res:
+                    continue
+
+                objhash = res.group(1)
+
+                if (objhash.lower(), user) in quarfiles:
+                    continue
+
+                q = QuarEntry()
+                q.path = str(entry)
+                q.malfile = self._get_malfile(user, objhash)
+
+                quarfiles[q.sha1, user] = q
+
+        return list(quarfiles.values())
