@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from datetime import datetime as dt
 from typing import TYPE_CHECKING
 
@@ -7,13 +8,13 @@ from maldump.parsers.kaitai.windef_entries import WindefEntries as KaitaiParserE
 from maldump.parsers.kaitai.windef_resource_data import (
     WindefResourceData as KaitaiParserResourceData,
 )
-from maldump.structures import QuarEntry
+from maldump.structures import QuarEntry, Parser
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
-class WindowsDefenderParser:
+class WindowsDefenderParser(Parser):
     def _normalize(self, path_chrs) -> str:
         path_str = "".join(map(chr, path_chrs[:-1]))
         if path_str[2:4] == "?\\":
@@ -30,7 +31,7 @@ class WindowsDefenderParser:
     def from_file(self, name: str, location: Path) -> list[QuarEntry]:
         self.name = name
         self.location = location
-        quarfiles = []
+        quarfiles = {}
 
         for metafile in self.location.glob("Entries/{*}"):
             kt = KaitaiParserEntries.from_file(metafile)
@@ -47,7 +48,27 @@ class WindowsDefenderParser:
                     q.threat = kt.data1.mal_type
                     q.path = self._normalize(e.entry.path.character)
                     q.malfile = malfile
-                    quarfiles.append(q)
+                    quarfiles[guid] = q
             kt.close()
 
-        return quarfiles
+        # if the metadata are lost, but we still have access to data themselves
+        for entry in self.location.glob("ResourceData/*/*"):
+            guid = entry.name
+
+            if guid in quarfiles:
+                continue
+
+            try:
+                malfile = self._get_malfile(guid)
+            # all IO errors, ValueError for incorrect structure,
+            # kataistruct.*Exceptions for constants
+            except Exception:
+                continue
+
+            q = QuarEntry()
+            q.malfile = malfile
+            q.path = str(entry)
+
+            quarfiles[guid] = q
+
+        return list(quarfiles.values())
