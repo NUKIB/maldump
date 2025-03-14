@@ -21,11 +21,15 @@ class WindowsDefenderParser(Parser):
             path_str = path_str[4:]
         return path_str
 
-    def _get_malfile(self, guid: str) -> bytes:
+    def _get_metadata(self, guid: str):
         quarfile = self.location / "ResourceData" / guid[:2] / guid
         kt = KaitaiParserResourceData.from_file(quarfile)
-        malfile = kt.encryptedfile.mal_file
         kt.close()
+        return kt
+
+    def _get_malfile(self, guid: str) -> bytes:
+        kt = self._get_metadata(guid)
+        malfile = kt.encryptedfile.mal_file
         return malfile
 
     def from_file(self, name: str, location: Path) -> list[QuarEntry]:
