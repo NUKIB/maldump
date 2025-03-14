@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from datetime import datetime as dt
 from typing import TYPE_CHECKING
 
@@ -62,16 +61,32 @@ class WindowsDefenderParser(Parser):
             if guid in quarfiles:
                 continue
 
+            if not entry.is_file():
+                continue
+
+            entry_stat = entry.stat()
+
+            ctime = entry_stat.st_ctime_ns
+            try:
+                ctime = entry_stat.st_birthtime_ns
+            except AttributeError:
+                # logging
+                pass
+
             try:
                 malfile = self._get_malfile(guid)
+                kt_data = self._get_metadata(guid)
             # all IO errors, ValueError for incorrect structure,
             # kataistruct.*Exceptions for constants
             except Exception:
                 continue
 
             q = QuarEntry()
-            q.malfile = malfile
             q.path = str(entry)
+            q.timestamp = ctime
+            q.size = kt_data.encryptedfile.len_malfile
+            q.threat = "Unknown-no-metadata"
+            q.malfile = malfile
 
             quarfiles[guid] = q
 
