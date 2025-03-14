@@ -251,7 +251,7 @@ class EsetParser(Parser):
                 # logging
                 pass
 
-            timestamp = ctime
+            timestamp = datetime.fromtimestamp(ctime // 1000000000)
             path = str(entry)
             sha1 = None
             size = entry_stat.st_size

@@ -83,7 +83,7 @@ class WindowsDefenderParser(Parser):
 
             q = QuarEntry()
             q.path = str(entry)
-            q.timestamp = ctime
+            q.timestamp = dt.fromtimestamp(ctime // 1000000000)
             q.size = kt_data.encryptedfile.len_malfile
             q.threat = "Unknown-no-metadata"
             q.malfile = malfile
