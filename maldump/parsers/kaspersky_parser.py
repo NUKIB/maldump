@@ -60,11 +60,27 @@ class KasperskyParser(Parser):
             if filename in quarfiles:
                 continue
 
+            if not entry.is_file():
+                continue
+
             malfile = self._get_malfile(filename)
+
+            entry_stat = entry.stat()
+
+            ctime = entry_stat.st_ctime_ns
+            try:
+                ctime = entry_stat.st_birthtime_ns
+            except AttributeError:
+                # logging
+                pass
+            size = entry_stat.st_size
+
             q = QuarEntry()
             q.path = str(entry)
+            q.timestamp = datetime.fromtimestamp(ctime // 1000000000)
+            q.size = size
+            q.threat = "Unknown-no-metadata"
             q.malfile = malfile
-
             quarfiles[filename] = q
 
         return list(quarfiles.values())
