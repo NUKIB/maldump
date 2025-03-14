@@ -98,10 +98,26 @@ class AVGParser(Parser):
             if chest_id in quarfiles:
                 continue
 
+            if not entry.is_file():
+                continue
+
             malfile = self._getRawFromFile(chest_id)
+            entry_stat = entry.stat()
+
+            ctime = entry_stat.st_ctime_ns
+            try:
+                ctime = entry_stat.st_birthtime_ns
+            except AttributeError:
+                # logging
+                pass
+
+            size = entry_stat.st_size
 
             q = QuarEntry()
             q.path = str(entry)
+            q.timestamp = dt.fromtimestamp(ctime // 1000000000)
+            q.size = size
+            q.threat = "Unknown-no-metadata"
             q.malfile = malfile
             quarfiles[chest_id] = q
 
