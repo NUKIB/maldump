@@ -20,9 +20,10 @@ import os
 import re
 import struct
 import sys
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 
+from maldump.parsers.kaitai.eset_ndf_parser import EsetNdfParser as KaitaiParserMetadata
 from maldump.structures import QuarEntry, Parser
 
 __author__ = "Ladislav Baco"
@@ -174,6 +175,9 @@ class EsetParser(Parser):
     def __init__(self):
         # Quarantine folder per user
         self.quarpath = "Users/{username}/AppData/Local/ESET/ESET Security/Quarantine/"
+        self.regex_user = re.compile(
+            r"Users[/\\]([^/\\]*)[/\\]AppData[/\\]Local[/\\]ESET[/\\]ESET Security[/\\]Quarantine[/\\]")
+        self.regex_entry = re.compile(r"([0-9a-fA-F]+)\.NQF$")
 
     def _decrypt(self, data: bytes) -> bytes:
         return bytes([((b - 84) % 256) ^ 0xA5 for b in data])
@@ -186,9 +190,20 @@ class EsetParser(Parser):
                 data = f.read()
                 decrypted_data = self._decrypt(data)
         except OSError:
+            # logging
             print("Eset Error: could not read file", quarfile)
 
         return decrypted_data
+
+    def _get_metadata(self, path: Path, objhash: str) -> KaitaiParserMetadata | None:
+        # metadata file has .NDF extension
+        metadata_path = path / (objhash + ".NDF")
+        if not metadata_path.is_file():
+            return None
+
+        kt = KaitaiParserMetadata.from_file(metadata_path)
+        kt.close()
+        return kt
 
     def from_file(self, name: str, location: Path) -> list[QuarEntry]:
         self.name = name
@@ -214,24 +229,50 @@ class EsetParser(Parser):
 
             active_users.add(metadata["user"])
 
-        regex = re.compile(r"([0-9a-fA-F]+)\.NQF$")
+        actual_path = Path("Users/")
+        for entry in actual_path.glob("*/AppData/Local/ESET/ESET Security/Quarantine/*.NQF"):
+            res_path = re.match(self.regex_entry, entry.name)
+            res_user = re.match(self.regex_user, str(entry))
 
-        for user in active_users:
-            for entry in os.listdir(self.quarpath.format(username=user)):
-                res = re.match(regex, entry)
+            if not res_path:
+                continue
 
-                if not res:
-                    continue
+            user = res_user.group(1)
+            objhash = res_path.group(1)
 
-                objhash = res.group(1)
+            if (objhash.lower(), user) in quarfiles:
+                continue
 
-                if (objhash.lower(), user) in quarfiles:
-                    continue
+            entry_stat = entry.stat()
+            ctime = entry_stat.st_ctime_ns
+            try:
+                ctime = entry_stat.st_birthtime_ns
+            except AttributeError:
+                # logging
+                pass
 
-                q = QuarEntry()
-                q.path = str(entry)
-                q.malfile = self._get_malfile(user, objhash)
+            timestamp = ctime
+            path = str(entry)
+            sha1 = None
+            size = entry_stat.st_size
+            threat = "Unknown-no-metadata"
 
-                quarfiles[q.sha1, user] = q
+            kt = self._get_metadata(entry.parent, objhash)
+            if kt is not None:
+                timestamp = kt.datetime_unix.date_time
+                path = kt.findings[0].mal_path.str_cont
+                sha1 = hex(int.from_bytes(kt.mal_hash_sha1, "big")).lstrip("0x")
+                size = kt.mal_size
+                threat = kt.findings[0].threat_canonized.str_cont
+
+            q = QuarEntry()
+            q.timestamp = timestamp
+            q.path = path
+            q.sha1 = sha1
+            q.size = size
+            q.threat = threat
+            q.malfile = self._get_malfile(user, objhash)
+
+            quarfiles[q.sha1, user] = q
 
         return list(quarfiles.values())
