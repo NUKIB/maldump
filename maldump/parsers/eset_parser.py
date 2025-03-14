@@ -115,7 +115,7 @@ def _extractFirstSeen(rawRecord):
         return ""
     littleEndianTimestamp = rawRecord[offset + 4 : offset + 8]
     timestamp = struct.unpack("<L", littleEndianTimestamp)[0]
-    return datetime.utcfromtimestamp(timestamp).strftime(TIMEFORMAT)
+    return datetime.fromtimestamp(timestamp, UTC).strftime(TIMEFORMAT)
 
 
 def _extractTimestamp(rawRecord):
