@@ -65,4 +65,26 @@ class Parser(ABC):
     """Abstract class describing parsers"""
 
     @abstractmethod
-    def from_file(self, name: str, location: Path) -> list[QuarEntry]: ...
+    def parse_from_log[T](self, name: str, location: Path, data: dict[T, QuarEntry] = None) -> dict[T, QuarEntry]: ...
+
+    @abstractmethod
+    def parse_from_fs[T](self, name: str, location: Path, data: dict[T, QuarEntry] = None) -> dict[T, QuarEntry]: ...
+
+    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
+        """
+        Template pattern function wrapper calling all the steps for retrieving
+        quarantine entries.
+        """
+        self.name = name
+        self.location = location
+        data = {}
+
+        data_step = self.parse_from_log(name, location, data)
+        if data_step is not None:
+            data.update(data_step)
+
+        data_step = self.parse_from_fs(name, location, data)
+        if data_step is not None:
+            data.update(data_step)
+
+        return list(data.values())
