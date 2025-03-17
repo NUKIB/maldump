@@ -19,10 +19,11 @@ class ForticlientParser(Parser):
     def _get_time(self, ts):
         return dt(ts.year, ts.month, ts.day, ts.hour, ts.minute, ts.second)
 
-    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
-        self.name = name
-        self.location = location
-        quarfiles = []
+    def parse_from_log(self, name, location, data=None):
+        pass
+
+    def parse_from_fs(self, name: str, location: Path, data: dict[str, QuarEntry] = None) -> dict[str, QuarEntry]:
+        quarfiles = {}
 
         for metafile in self.location.glob("*[!.meta]"):
             kt = KaitaiParser.from_file(metafile)
@@ -32,7 +33,7 @@ class ForticlientParser(Parser):
             q.path = self._normalize_path(kt.mal_path)
             q.size = kt.mal_len
             q.malfile = kt.mal_file
-            quarfiles.append(q)
+            quarfiles[str(metafile)] = q
             kt.close()
 
         return quarfiles
