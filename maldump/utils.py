@@ -47,7 +47,7 @@ class RawTimeConverter:
 
 class DatetimeConverter:
     @staticmethod
-    def get_dt_from_stat(stat):
+    def get_dt_from_stat(stat) -> datetime:
         ctime = stat.st_ctime_ns
         try:
             ctime = stat.st_birthtime_ns
