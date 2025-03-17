@@ -6,12 +6,14 @@ from typing import TYPE_CHECKING
 
 from maldump.structures import QuarEntry, Parser
 from maldump.utils import xor
+from maldump.utils import DatetimeConverter as DTC
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
 class KasperskyParser(Parser):
+
     def _normalize_time(self, number: int) -> datetime:
         year = (number >> 48) & 0xFFFF
         month = (number >> 40) & 0xFF
@@ -28,9 +30,7 @@ class KasperskyParser(Parser):
         with open(file, "rb") as f:
             return xor(f.read(), key)
 
-    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
-        self.name = name
-        self.location = location
+    def parse_from_log(self, name: str, location: Path, data: dict[str, QuarEntry] = None) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         try:
@@ -54,33 +54,32 @@ class KasperskyParser(Parser):
 
         conn.close()
 
-        for entry in self.location.glob("{*}"):
-            filename = entry.name
+        return quarfiles
 
-            if filename in quarfiles:
+    def parse_from_fs(self, name: str, location: Path, data: dict[T, QuarEntry] = None) -> dict[T, QuarEntry]:
+        quarfiles = {}
+
+        for entry in self.location.glob("{*}"):
+            if not entry.is_file():
                 continue
 
-            if not entry.is_file():
+            filename = entry.name
+
+            if filename in data:
                 continue
 
             malfile = self._get_malfile(filename)
 
             entry_stat = entry.stat()
-
-            ctime = entry_stat.st_ctime_ns
-            try:
-                ctime = entry_stat.st_birthtime_ns
-            except AttributeError:
-                # logging
-                pass
+            timestamp = DTC.get_dt_from_stat(entry_stat)
             size = entry_stat.st_size
 
             q = QuarEntry()
             q.path = str(entry)
-            q.timestamp = datetime.fromtimestamp(ctime // 1000000000)
+            q.timestamp = timestamp
             q.size = size
             q.threat = "Unknown-no-metadata"
             q.malfile = malfile
             quarfiles[filename] = q
 
-        return list(quarfiles.values())
+        return quarfiles
