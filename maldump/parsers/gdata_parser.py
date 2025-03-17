@@ -11,10 +11,12 @@ if TYPE_CHECKING:
 
 
 class GdataParser(Parser):
-    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
-        self.name = name
-        self.location = location
-        quarfiles = []
+
+    def parse_from_log(self, name, location, data=None):
+        pass
+
+    def parse_from_fs(self, name: str, location: Path, data: dict[str, QuarEntry] = None) -> dict[str, QuarEntry]:
+        quarfiles = {}
 
         for metafile in self.location.glob("*.q"):
             kt = KaitaiParser.from_file(metafile)
@@ -25,7 +27,7 @@ class GdataParser(Parser):
             q.path = kt.data2.path.string_content[4:]
             q.size = kt.data2.filesize
             q.malfile = kt.mal_file
-            quarfiles.append(q)
+            quarfiles[str(metafile)] = q
             kt.close()
 
         return quarfiles
