@@ -16,7 +16,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import annotations
 
 import binascii
-import os
 import re
 import struct
 import sys
@@ -25,6 +24,8 @@ from pathlib import Path
 
 from maldump.parsers.kaitai.eset_ndf_parser import EsetNdfParser as KaitaiParserMetadata
 from maldump.structures import QuarEntry, Parser
+
+from maldump.utils import DatetimeConverter as DTC
 
 __author__ = "Ladislav Baco"
 __copyright__ = "Copyright (C) 2017"
@@ -205,17 +206,8 @@ class EsetParser(Parser):
         kt.close()
         return kt
 
-    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
-        self.name = name
-        self.location = location
-
+    def parse_from_log(self, name: str, location: Path, data: dict[tuple[str, datetime], QuarEntry] = None) -> dict[tuple[str, datetime], QuarEntry]:
         quarfiles: dict[tuple[str, datetime], QuarEntry] = {}
-        active_users = set()
-
-        actual_login = os.getlogin()
-        user_path = self.quarpath.format(username=actual_login)
-        if os.path.exists(user_path):
-            active_users.add(actual_login)
 
         for metadata in mainParsing(self.location):
             if metadata["user"] == "SYSTEM":
@@ -227,7 +219,10 @@ class EsetParser(Parser):
             q.malfile = self._get_malfile(metadata["user"], metadata["objhash"])
             quarfiles[q.sha1, metadata["user"]] = q
 
-            active_users.add(metadata["user"])
+        return quarfiles
+
+    def parse_from_fs(self, name: str, location: Path, data: dict[tuple[str, datetime], QuarEntry] = None) -> dict[tuple[str, datetime], QuarEntry]:
+        quarfiles = {}
 
         actual_path = Path("Users/")
         for entry in actual_path.glob("*/AppData/Local/ESET/ESET Security/Quarantine/*.NQF"):
@@ -240,18 +235,12 @@ class EsetParser(Parser):
             user = res_user.group(1)
             objhash = res_path.group(1)
 
-            if (objhash.lower(), user) in quarfiles:
+            if (objhash.lower(), user) in data:
                 continue
 
             entry_stat = entry.stat()
-            ctime = entry_stat.st_ctime_ns
-            try:
-                ctime = entry_stat.st_birthtime_ns
-            except AttributeError:
-                # logging
-                pass
 
-            timestamp = datetime.fromtimestamp(ctime // 1000000000)
+            timestamp = DTC.get_dt_from_stat(entry_stat)
             path = str(entry)
             sha1 = None
             size = entry_stat.st_size
@@ -275,4 +264,4 @@ class EsetParser(Parser):
 
             quarfiles[q.sha1, user] = q
 
-        return list(quarfiles.values())
+        return quarfiles
