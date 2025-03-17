@@ -43,3 +43,16 @@ class RawTimeConverter:
             return self._decode_unix(wintime_bytes)
         else:
             raise NotImplementedError
+
+
+class DatetimeConverter:
+    @staticmethod
+    def get_dt_from_stat(stat):
+        ctime = stat.st_ctime_ns
+        try:
+            ctime = stat.st_birthtime_ns
+        except AttributeError:
+            # logging
+            pass
+
+        return datetime.fromtimestamp(ctime // 1000000000)
