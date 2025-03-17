@@ -10,6 +10,7 @@ import defusedxml.ElementTree as ET
 
 from maldump.structures import QuarEntry, Parser
 from maldump.utils import xor
+from maldump.utils import DatetimeConverter as DTC
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -59,15 +60,12 @@ class AVGParser(Parser):
             data = f.read()[8:]  # Strip magic bytes
             return xor(data, key)
 
-    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
-        self.name = name
-        self.location = location
-
+    def parse_from_log(self, name: str, location: Path, actual_data: dict[str, QuarEntry] = None) -> dict[str, QuarEntry]:
         self._initDB()
         quarfiles = {}
 
         # Return the value of a field 'f'
-        def get(e, f):
+        def get(e: ET, f) -> str:
             return e.find(f).text
 
         for e in self.root.findall("ChestEntry"):
@@ -88,37 +86,36 @@ class AVGParser(Parser):
 
             quarfiles[chest_id] = q
 
+        return quarfiles
+
+    def parse_from_fs(self, name: str, location: Path, data: dict[str, QuarEntry] = None) -> dict[str, QuarEntry]:
+        quarfiles = {}
+
         # iterating over bigger files, which were not logged to vault.db
         for entry in self.location.glob("*"):
             chest_id = entry.name
 
-            if chest_id == "index.xml":
-                continue
-
-            if chest_id in quarfiles:
-                continue
-
             if not entry.is_file():
                 continue
 
+            if chest_id == "index.xml":
+                continue
+
+            if chest_id in data:
+                continue
+
             malfile = self._getRawFromFile(chest_id)
+
             entry_stat = entry.stat()
-
-            ctime = entry_stat.st_ctime_ns
-            try:
-                ctime = entry_stat.st_birthtime_ns
-            except AttributeError:
-                # logging
-                pass
-
+            timestamp = DTC.get_dt_from_stat(entry_stat)
             size = entry_stat.st_size
 
             q = QuarEntry()
             q.path = str(entry)
-            q.timestamp = dt.fromtimestamp(ctime // 1000000000)
+            q.timestamp = timestamp
             q.size = size
             q.threat = "Unknown-no-metadata"
             q.malfile = malfile
             quarfiles[chest_id] = q
 
-        return list(quarfiles.values())
+        return quarfiles
