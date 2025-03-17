@@ -22,7 +22,7 @@ class CustomArc4:
         cipher = ARC4(self.key)
         return cipher.decrypt(plaintext)
 
-class TimeConverter:
+class RawTimeConverter:
     def __init__(self, time_type: str):
         self.time_type = time_type
 
