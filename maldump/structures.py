@@ -66,12 +66,12 @@ class Parser(ABC):
 
     @abstractmethod
     def parse_from_log[T](
-        self, name: str, location: Path, data: Optional[dict[T, QuarEntry]] = None
+        self, data: Optional[dict[T, QuarEntry]] = None
     ) -> Optional[dict[T, QuarEntry]]: ...
 
     @abstractmethod
     def parse_from_fs[T](
-        self, name: str, location: Path, data: Optional[dict[T, QuarEntry]] = None
+        self, data: Optional[dict[T, QuarEntry]] = None
     ) -> Optional[dict[T, QuarEntry]]: ...
 
     def from_file(self, name: str, location: Path) -> list[QuarEntry]:
@@ -83,11 +83,11 @@ class Parser(ABC):
         self.location = location
         data = {}
 
-        data_step = self.parse_from_log(name, location, data)
+        data_step = self.parse_from_log(data)
         if data_step is not None:
             data.update(data_step)
 
-        data_step = self.parse_from_fs(name, location, data)
+        data_step = self.parse_from_fs(data)
         if data_step is not None:
             data.update(data_step)
 

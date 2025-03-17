@@ -31,8 +31,8 @@ class KasperskyParser(Parser):
             return xor(f.read(), key)
 
     def parse_from_log(
-        self, name: str, location: Path, data: Optional[dict[str, QuarEntry]] = None
-    ) -> Optional[dict[str, QuarEntry]]:
+        self, data: Optional[dict[str, QuarEntry]] = None
+    ) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         try:
@@ -59,8 +59,8 @@ class KasperskyParser(Parser):
         return quarfiles
 
     def parse_from_fs(
-        self, name: str, location: Path, data: Optional[dict[str, QuarEntry]] = None
-    ) -> Optional[dict[str, QuarEntry]]:
+        self, data: Optional[dict[str, QuarEntry]] = None
+    ) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         for entry in self.location.glob("{*}"):

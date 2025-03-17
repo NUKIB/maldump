@@ -61,11 +61,8 @@ class AvastParser(Parser):
             return xor(data, key)
 
     def parse_from_log(
-        self,
-        name: str,
-        location: Path,
-        actual_data: Optional[dict[str, QuarEntry]] = None,
-    ) -> Optional[dict[str, QuarEntry]]:
+        self, data: Optional[dict[str, QuarEntry]] = None
+    ) -> dict[str, QuarEntry]:
         self._initDB()
         quarfiles = {}
 

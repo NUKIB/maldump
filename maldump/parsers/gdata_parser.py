@@ -12,12 +12,12 @@ if TYPE_CHECKING:
 
 class GdataParser(Parser):
 
-    def parse_from_log(self, name, location, data=None):
+    def parse_from_log(self, data=None):
         pass
 
     def parse_from_fs(
-        self, name: str, location: Path, data: Optional[dict[str, QuarEntry]] = None
-    ) -> Optional[dict[str, QuarEntry]]:
+        self, data: Optional[dict[str, QuarEntry]] = None
+    ) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         for metafile in self.location.glob("*.q"):

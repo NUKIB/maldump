@@ -61,11 +61,8 @@ class AVGParser(Parser):
             return xor(data, key)
 
     def parse_from_log(
-        self,
-        name: str,
-        location: Path,
-        actual_data: Optional[dict[str, QuarEntry]] = None,
-    ) -> Optional[dict[str, QuarEntry]]:
+        self, data: Optional[dict[str, QuarEntry]] = None
+    ) -> dict[str, QuarEntry]:
         self._initDB()
         quarfiles = {}
 
@@ -94,8 +91,8 @@ class AVGParser(Parser):
         return quarfiles
 
     def parse_from_fs(
-        self, name: str, location: Path, data: Optional[dict[str, QuarEntry]] = None
-    ) -> Optional[dict[str, QuarEntry]]:
+        self, data: Optional[dict[str, QuarEntry]] = None
+    ) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         # iterating over bigger files, which were not logged to vault.db

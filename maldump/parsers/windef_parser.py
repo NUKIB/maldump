@@ -32,9 +32,7 @@ class WindowsDefenderParser(Parser):
         malfile = kt.encryptedfile.mal_file
         return malfile
 
-    def parse_from_log(
-        self, name: str, location: Path, data: Optional[dict[str, QuarEntry]] = None
-    ) -> Optional[dict[str, QuarEntry]]:
+    def parse_from_log(self, data: str = None) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         for metafile in self.location.glob("Entries/{*}"):
@@ -57,9 +55,7 @@ class WindowsDefenderParser(Parser):
 
         return quarfiles
 
-    def parse_from_fs(
-        self, name: str, location: Path, data: Optional[dict[str, QuarEntry]] = None
-    ) -> Optional[dict[str, QuarEntry]]:
+    def parse_from_fs(self, data: str = None) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         # if the metadata are lost, but we still have access to data themselves

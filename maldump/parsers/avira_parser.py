@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 class AviraParser(Parser):
 
     def parse_from_log(
-        self, name: str, location: Path, data: Optional[dict[str, QuarEntry]] = None
-    ) -> Optional[dict[str, QuarEntry]]:
+        self, data: Optional[dict[str, QuarEntry]] = None
+    ) -> dict[str, QuarEntry]:
         quarfiles = {}
         for metafile in self.location.glob("*.qua"):
             kt = KaitaiParser.from_file(metafile)
@@ -28,5 +28,5 @@ class AviraParser(Parser):
 
         return quarfiles
 
-    def parse_from_fs(self, name: str, location: Path, data=None):
+    def parse_from_fs(self, data=None):
         pass

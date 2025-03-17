@@ -209,11 +209,8 @@ class EsetParser(Parser):
         return kt
 
     def parse_from_log(
-        self,
-        name: str,
-        location: Path,
-        data: Optional[dict[tuple[str, datetime], QuarEntry]] = None,
-    ) -> Optional[dict[tuple[str, datetime], QuarEntry]]:
+        self, data: Optional[dict[tuple[str, datetime], QuarEntry]] = None
+    ) -> dict[tuple[str, datetime], QuarEntry]:
         quarfiles: dict[tuple[str, datetime], QuarEntry] = {}
 
         for metadata in mainParsing(self.location):
@@ -229,11 +226,8 @@ class EsetParser(Parser):
         return quarfiles
 
     def parse_from_fs(
-        self,
-        name: str,
-        location: Path,
-        data: Optional[dict[tuple[str, datetime], QuarEntry]] = None,
-    ) -> Optional[dict[tuple[str, datetime], QuarEntry]]:
+        self, data: Optional[dict[tuple[str, datetime], QuarEntry]] = None
+    ) -> dict[tuple[str, datetime], QuarEntry]:
         quarfiles = {}
 
         actual_path = Path("Users/")
