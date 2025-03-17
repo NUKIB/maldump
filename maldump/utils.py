@@ -1,6 +1,7 @@
 """
 Convenience utils for use in avs and parsers
 """
+
 from datetime import datetime, UTC
 
 from arc4 import ARC4
@@ -21,6 +22,7 @@ class CustomArc4:
     def decode(self, plaintext: bytes) -> bytes:
         cipher = ARC4(self.key)
         return cipher.decrypt(plaintext)
+
 
 class RawTimeConverter:
     def __init__(self, time_type: str):

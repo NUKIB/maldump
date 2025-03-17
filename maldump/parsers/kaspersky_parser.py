@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sqlite3
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from maldump.structures import QuarEntry, Parser
 from maldump.utils import xor
@@ -31,8 +31,8 @@ class KasperskyParser(Parser):
             return xor(f.read(), key)
 
     def parse_from_log(
-        self, name: str, location: Path, data: dict[str, QuarEntry] = None
-    ) -> dict[str, QuarEntry]:
+        self, name: str, location: Path, data: Optional[dict[str, QuarEntry]] = None
+    ) -> Optional[dict[str, QuarEntry]]:
         quarfiles = {}
 
         try:
@@ -59,8 +59,8 @@ class KasperskyParser(Parser):
         return quarfiles
 
     def parse_from_fs(
-        self, name: str, location: Path, data: dict[str, QuarEntry] = None
-    ) -> dict[str, QuarEntry]:
+        self, name: str, location: Path, data: Optional[dict[str, QuarEntry]] = None
+    ) -> Optional[dict[str, QuarEntry]]:
         quarfiles = {}
 
         for entry in self.location.glob("{*}"):

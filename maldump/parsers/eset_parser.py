@@ -21,6 +21,7 @@ import struct
 import sys
 from datetime import datetime, UTC
 from pathlib import Path
+from typing import Optional
 
 from maldump.parsers.kaitai.eset_ndf_parser import EsetNdfParser as KaitaiParserMetadata
 from maldump.structures import QuarEntry, Parser
@@ -211,8 +212,8 @@ class EsetParser(Parser):
         self,
         name: str,
         location: Path,
-        data: dict[tuple[str, datetime], QuarEntry] = None,
-    ) -> dict[tuple[str, datetime], QuarEntry]:
+        data: Optional[dict[tuple[str, datetime], QuarEntry]] = None,
+    ) -> Optional[dict[tuple[str, datetime], QuarEntry]]:
         quarfiles: dict[tuple[str, datetime], QuarEntry] = {}
 
         for metadata in mainParsing(self.location):
@@ -231,8 +232,8 @@ class EsetParser(Parser):
         self,
         name: str,
         location: Path,
-        data: dict[tuple[str, datetime], QuarEntry] = None,
-    ) -> dict[tuple[str, datetime], QuarEntry]:
+        data: Optional[dict[tuple[str, datetime], QuarEntry]] = None,
+    ) -> Optional[dict[tuple[str, datetime], QuarEntry]]:
         quarfiles = {}
 
         actual_path = Path("Users/")

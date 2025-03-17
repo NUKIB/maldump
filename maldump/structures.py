@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from datetime import datetime as dt
@@ -65,10 +65,14 @@ class Parser(ABC):
     """Abstract class describing parsers"""
 
     @abstractmethod
-    def parse_from_log[T](self, name: str, location: Path, data: dict[T, QuarEntry] = None) -> dict[T, QuarEntry]: ...
+    def parse_from_log[T](
+        self, name: str, location: Path, data: Optional[dict[T, QuarEntry]] = None
+    ) -> Optional[dict[T, QuarEntry]]: ...
 
     @abstractmethod
-    def parse_from_fs[T](self, name: str, location: Path, data: dict[T, QuarEntry] = None) -> dict[T, QuarEntry]: ...
+    def parse_from_fs[T](
+        self, name: str, location: Path, data: Optional[dict[T, QuarEntry]] = None
+    ) -> Optional[dict[T, QuarEntry]]: ...
 
     def from_file(self, name: str, location: Path) -> list[QuarEntry]:
         """

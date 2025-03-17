@@ -4,7 +4,7 @@ import re
 import sys
 import zipfile
 from datetime import datetime as dt
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, TypedDict, Optional
 from zipfile import ZipFile
 
 import defusedxml.ElementTree as ET
@@ -36,8 +36,8 @@ class McafeeParser(Parser):
         pass
 
     def parse_from_fs(
-        self, name: str, location: Path, data: dict[str, QuarEntry] = None
-    ) -> dict[str, QuarEntry]:
+        self, name: str, location: Path, data: Optional[dict[str, QuarEntry]] = None
+    ) -> Optional[dict[str, QuarEntry]]:
         quarfiles = {}
 
         for metafile in self.location.glob("*.zip"):

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime as dt
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from maldump.parsers.kaitai.forticlient_parser import ForticlientParser as KaitaiParser
 from maldump.structures import QuarEntry, Parser
@@ -23,8 +23,8 @@ class ForticlientParser(Parser):
         pass
 
     def parse_from_fs(
-        self, name: str, location: Path, data: dict[str, QuarEntry] = None
-    ) -> dict[str, QuarEntry]:
+        self, name: str, location: Path, data: Optional[dict[str, QuarEntry]] = None
+    ) -> Optional[dict[str, QuarEntry]]:
         quarfiles = {}
 
         for metafile in self.location.glob("*[!.meta]"):

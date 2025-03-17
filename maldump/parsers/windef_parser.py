@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime as dt
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from maldump.parsers.kaitai.windef_entries import WindefEntries as KaitaiParserEntries
 from maldump.parsers.kaitai.windef_resource_data import (
@@ -33,8 +33,8 @@ class WindowsDefenderParser(Parser):
         return malfile
 
     def parse_from_log(
-        self, name: str, location: Path, data: dict[str, QuarEntry] = None
-    ) -> dict[str, QuarEntry]:
+        self, name: str, location: Path, data: Optional[dict[str, QuarEntry]] = None
+    ) -> Optional[dict[str, QuarEntry]]:
         quarfiles = {}
 
         for metafile in self.location.glob("Entries/{*}"):
@@ -58,8 +58,8 @@ class WindowsDefenderParser(Parser):
         return quarfiles
 
     def parse_from_fs(
-        self, name: str, location: Path, data: dict[str, QuarEntry] = None
-    ) -> dict[str, QuarEntry]:
+        self, name: str, location: Path, data: Optional[dict[str, QuarEntry]] = None
+    ) -> Optional[dict[str, QuarEntry]]:
         quarfiles = {}
 
         # if the metadata are lost, but we still have access to data themselves
