@@ -32,10 +32,11 @@ class McafeeParser(Parser):
     _raw_malware = ""
     _xml_data = ""
 
-    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
-        self.name = name
-        self.location = location
-        quarfiles = []
+    def parse_from_log(self, name: str, location: Path, data=None):
+        pass
+
+    def parse_from_fs(self, name: str, location: Path, data: dict[str, QuarEntry] = None) -> dict[str, QuarEntry]:
+        quarfiles = {}
 
         for metafile in self.location.glob("*.zip"):
             parser = self._get_data(file_name=metafile)
@@ -45,7 +46,7 @@ class McafeeParser(Parser):
             q.path = parser["file_name"]
             q.size = int(parser["size"])
             q.malfile = parser["mal_file"]
-            quarfiles.append(q)
+            quarfiles[str(metafile)] = q
 
         return quarfiles
 
