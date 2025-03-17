@@ -8,6 +8,7 @@ from maldump.parsers.kaitai.windef_resource_data import (
     WindefResourceData as KaitaiParserResourceData,
 )
 from maldump.structures import QuarEntry, Parser
+from maldump.utils import DatetimeConverter as DTC
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -31,9 +32,7 @@ class WindowsDefenderParser(Parser):
         malfile = kt.encryptedfile.mal_file
         return malfile
 
-    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
-        self.name = name
-        self.location = location
+    def parse_from_log(self, name: str, location: Path, data: dict[str, QuarEntry] = None) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         for metafile in self.location.glob("Entries/{*}"):
@@ -54,24 +53,23 @@ class WindowsDefenderParser(Parser):
                     quarfiles[guid] = q
             kt.close()
 
+        return quarfiles
+
+    def parse_from_fs(self, name: str, location: Path, data: dict[T, QuarEntry] = None) -> dict[T, QuarEntry]:
+        quarfiles = {}
+
         # if the metadata are lost, but we still have access to data themselves
         for entry in self.location.glob("ResourceData/*/*"):
-            guid = entry.name
-
-            if guid in quarfiles:
-                continue
-
             if not entry.is_file():
                 continue
 
-            entry_stat = entry.stat()
+            guid = entry.name
 
-            ctime = entry_stat.st_ctime_ns
-            try:
-                ctime = entry_stat.st_birthtime_ns
-            except AttributeError:
-                # logging
-                pass
+            if guid in data:
+                continue
+
+            entry_stat = entry.stat()
+            timestamp = DTC.get_dt_from_stat(entry_stat)
 
             try:
                 malfile = self._get_malfile(guid)
@@ -83,11 +81,11 @@ class WindowsDefenderParser(Parser):
 
             q = QuarEntry()
             q.path = str(entry)
-            q.timestamp = dt.fromtimestamp(ctime // 1000000000)
+            q.timestamp = timestamp
             q.size = kt_data.encryptedfile.len_malfile
             q.threat = "Unknown-no-metadata"
             q.malfile = malfile
 
             quarfiles[guid] = q
 
-        return list(quarfiles.values())
+        return quarfiles
