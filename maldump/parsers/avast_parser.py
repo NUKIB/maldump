@@ -60,7 +60,9 @@ class AvastParser(Parser):
             data = f.read()[8:]  # Strip magic bytes
             return xor(data, key)
 
-    def parse_from_log(self, name: str, location: Path, actual_data: dict[str, QuarEntry] = None) -> dict[str, QuarEntry]:
+    def parse_from_log(
+        self, name: str, location: Path, actual_data: dict[str, QuarEntry] = None
+    ) -> dict[str, QuarEntry]:
         self._initDB()
         quarfiles = {}
 
@@ -88,7 +90,9 @@ class AvastParser(Parser):
 
         return quarfiles
 
-    def parse_from_fs(self, name: str, location: Path, data: dict[str, QuarEntry] = None) -> dict[str, QuarEntry]:
+    def parse_from_fs(
+        self, name: str, location: Path, data: dict[str, QuarEntry] = None
+    ) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         # iterating over bigger files, which were not logged to vault.db

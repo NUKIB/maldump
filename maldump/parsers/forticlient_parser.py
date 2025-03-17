@@ -22,7 +22,9 @@ class ForticlientParser(Parser):
     def parse_from_log(self, name, location, data=None):
         pass
 
-    def parse_from_fs(self, name: str, location: Path, data: dict[str, QuarEntry] = None) -> dict[str, QuarEntry]:
+    def parse_from_fs(
+        self, name: str, location: Path, data: dict[str, QuarEntry] = None
+    ) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         for metafile in self.location.glob("*[!.meta]"):

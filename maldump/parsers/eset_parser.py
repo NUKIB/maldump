@@ -177,7 +177,8 @@ class EsetParser(Parser):
         # Quarantine folder per user
         self.quarpath = "Users/{username}/AppData/Local/ESET/ESET Security/Quarantine/"
         self.regex_user = re.compile(
-            r"Users[/\\]([^/\\]*)[/\\]AppData[/\\]Local[/\\]ESET[/\\]ESET Security[/\\]Quarantine[/\\]")
+            r"Users[/\\]([^/\\]*)[/\\]AppData[/\\]Local[/\\]ESET[/\\]ESET Security[/\\]Quarantine[/\\]"
+        )
         self.regex_entry = re.compile(r"([0-9a-fA-F]+)\.NQF$")
 
     def _decrypt(self, data: bytes) -> bytes:
@@ -206,7 +207,12 @@ class EsetParser(Parser):
         kt.close()
         return kt
 
-    def parse_from_log(self, name: str, location: Path, data: dict[tuple[str, datetime], QuarEntry] = None) -> dict[tuple[str, datetime], QuarEntry]:
+    def parse_from_log(
+        self,
+        name: str,
+        location: Path,
+        data: dict[tuple[str, datetime], QuarEntry] = None,
+    ) -> dict[tuple[str, datetime], QuarEntry]:
         quarfiles: dict[tuple[str, datetime], QuarEntry] = {}
 
         for metadata in mainParsing(self.location):
@@ -221,11 +227,18 @@ class EsetParser(Parser):
 
         return quarfiles
 
-    def parse_from_fs(self, name: str, location: Path, data: dict[tuple[str, datetime], QuarEntry] = None) -> dict[tuple[str, datetime], QuarEntry]:
+    def parse_from_fs(
+        self,
+        name: str,
+        location: Path,
+        data: dict[tuple[str, datetime], QuarEntry] = None,
+    ) -> dict[tuple[str, datetime], QuarEntry]:
         quarfiles = {}
 
         actual_path = Path("Users/")
-        for entry in actual_path.glob("*/AppData/Local/ESET/ESET Security/Quarantine/*.NQF"):
+        for entry in actual_path.glob(
+            "*/AppData/Local/ESET/ESET Security/Quarantine/*.NQF"
+        ):
             res_path = re.match(self.regex_entry, entry.name)
             res_user = re.match(self.regex_user, str(entry))
 
