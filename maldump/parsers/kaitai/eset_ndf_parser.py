@@ -19,7 +19,7 @@ class EsetNdfParser(KaitaiStruct):
         self.magic = self._io.read_bytes(8)
         if not self.magic == b"\x46\x51\x44\x46\xA4\x0F\x00\x00":
             raise kaitaistruct.ValidationNotEqualError(b"\x46\x51\x44\x46\xA4\x0F\x00\x00", self.magic, self._io, u"/seq/0")
-        self.findings_num = self._io.read_u4le()
+        self.num_findings = self._io.read_u4le()
         self.datetime_unix = EsetNdfParser.Unixdate(self._io, self, self._root)
         self.filler = self._io.read_bytes(4)
         if not self.filler == b"\x00\x00\x00\x00":
@@ -28,10 +28,8 @@ class EsetNdfParser(KaitaiStruct):
         self.len_mal_hash_sha1 = self._io.read_u4le()
         self.mal_hash_sha1 = self._io.read_bytes(self.len_mal_hash_sha1)
         self.findings = []
-        i = 0
-        while not self._io.is_eof():
+        for i in range(self.num_findings):
             self.findings.append(EsetNdfParser.Threat(self._io, self, self._root))
-            i += 1
 
 
     class Threat(KaitaiStruct):
@@ -75,7 +73,7 @@ class EsetNdfParser(KaitaiStruct):
 
         def _read(self):
             self._raw_date_time = self._io.read_bytes(8)
-            _process = maldump.utils.TimeConverter(u"windows")
+            _process = maldump.utils.RawTimeConverter(u"windows")
             self.date_time = _process.decode(self._raw_date_time)
 
 
@@ -88,7 +86,7 @@ class EsetNdfParser(KaitaiStruct):
 
         def _read(self):
             self._raw_date_time = self._io.read_bytes(4)
-            _process = maldump.utils.TimeConverter(u"unix")
+            _process = maldump.utils.RawTimeConverter(u"unix")
             self.date_time = _process.decode(self._raw_date_time)
 
 

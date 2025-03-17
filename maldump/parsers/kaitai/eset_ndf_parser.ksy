@@ -7,7 +7,7 @@ seq:
   - id: magic
     size: 0x08
     contents: [ 0x46, 0x51, 0x44, 0x46, 0xa4, 0x0f, 0x00, 0x00 ]  # FQDF
-  - id: findings_num
+  - id: num_findings
     type: u4
   - id: datetime_unix
     type: unixdate
@@ -22,7 +22,7 @@ seq:
     size: len_mal_hash_sha1
   - id: findings
     type: threat
-    repeat-expr: findings_num
+    repeat-expr: num_findings
     repeat: expr
 
 
@@ -69,12 +69,12 @@ types:
     seq:
       - id: date_time
         size: 0x08
-        process: maldump.utils.time_converter( "windows" )
+        process: maldump.utils.raw_time_converter( "windows" )
   unixdate:
     seq:
       - id: date_time
         size: 0x04
-        process: maldump.utils.time_converter( "unix" )
+        process: maldump.utils.raw_time_converter( "unix" )
 
   widestr:
     seq:
