@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from datetime import datetime as dt
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from maldump.parsers.kaitai.gdata_parser import GdataParser as KaitaiParser
-from maldump.structures import QuarEntry, Parser
+from maldump.structures import Parser, QuarEntry
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -15,9 +15,7 @@ class GdataParser(Parser):
     def parse_from_log(self, data=None):
         pass
 
-    def parse_from_fs(
-        self, data: Optional[dict[str, QuarEntry]] = None
-    ) -> dict[str, QuarEntry]:
+    def parse_from_fs(self, _=None) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         for metafile in self.location.glob("*.q"):

@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import hashlib
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
     from datetime import datetime as dt
     from pathlib import Path
+
+T = TypeVar("T")
 
 
 class QuarEntry:
@@ -65,14 +67,14 @@ class Parser(ABC):
     """Abstract class describing parsers"""
 
     @abstractmethod
-    def parse_from_log[T](
-        self, data: Optional[dict[T, QuarEntry]] = None
-    ) -> Optional[dict[T, QuarEntry]]: ...
+    def parse_from_log(
+        self, data: dict[T, QuarEntry] | None = None
+    ) -> dict[T, QuarEntry] | None: ...
 
     @abstractmethod
-    def parse_from_fs[T](
-        self, data: Optional[dict[T, QuarEntry]] = None
-    ) -> Optional[dict[T, QuarEntry]]: ...
+    def parse_from_fs(
+        self, data: dict[T, QuarEntry] | None = None
+    ) -> dict[T, QuarEntry] | None: ...
 
     def from_file(self, name: str, location: Path) -> list[QuarEntry]:
         """

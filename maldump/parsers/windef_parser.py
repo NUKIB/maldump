@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 from datetime import datetime as dt
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
+
+from kaitaistruct import KaitaiStructError
 
 from maldump.parsers.kaitai.windef_entries import WindefEntries as KaitaiParserEntries
 from maldump.parsers.kaitai.windef_resource_data import (
     WindefResourceData as KaitaiParserResourceData,
 )
-from maldump.structures import QuarEntry, Parser
+from maldump.structures import Parser, QuarEntry
 from maldump.utils import DatetimeConverter as DTC
 
 if TYPE_CHECKING:
@@ -29,10 +31,9 @@ class WindowsDefenderParser(Parser):
 
     def _get_malfile(self, guid: str) -> bytes:
         kt = self._get_metadata(guid)
-        malfile = kt.encryptedfile.mal_file
-        return malfile
+        return kt.encryptedfile.mal_file
 
-    def parse_from_log(self, data: str = None) -> dict[str, QuarEntry]:
+    def parse_from_log(self, _=None) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         for metafile in self.location.glob("Entries/{*}"):
@@ -55,7 +56,9 @@ class WindowsDefenderParser(Parser):
 
         return quarfiles
 
-    def parse_from_fs(self, data: str = None) -> dict[str, QuarEntry]:
+    def parse_from_fs(
+        self, data: dict[str, QuarEntry] | None = None
+    ) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         # if the metadata are lost, but we still have access to data themselves
@@ -76,7 +79,7 @@ class WindowsDefenderParser(Parser):
                 kt_data = self._get_metadata(guid)
             # all IO errors, ValueError for incorrect structure,
             # kataistruct.*Exceptions for constants
-            except Exception:
+            except (OSError, ValueError, KaitaiStructError):
                 continue
 
             q = QuarEntry()

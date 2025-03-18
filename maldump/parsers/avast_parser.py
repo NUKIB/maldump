@@ -4,13 +4,13 @@ import sqlite3
 import tempfile
 from datetime import datetime as dt
 from os import unlink
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import defusedxml.ElementTree as ET
 
 from maldump.structures import Parser, QuarEntry
-from maldump.utils import xor
 from maldump.utils import DatetimeConverter as DTC
+from maldump.utils import xor
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -60,9 +60,7 @@ class AvastParser(Parser):
             data = f.read()[8:]  # Strip magic bytes
             return xor(data, key)
 
-    def parse_from_log(
-        self, data: Optional[dict[str, QuarEntry]] = None
-    ) -> dict[str, QuarEntry]:
+    def parse_from_log(self, _=None) -> dict[str, QuarEntry]:
         self._initDB()
         quarfiles = {}
 
@@ -91,8 +89,8 @@ class AvastParser(Parser):
         return quarfiles
 
     def parse_from_fs(
-        self, name: str, location: Path, data: Optional[dict[str, QuarEntry]] = None
-    ) -> Optional[dict[str, QuarEntry]]:
+        self, data: dict[str, QuarEntry] | None = None
+    ) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         # iterating over bigger files, which were not logged to vault.db

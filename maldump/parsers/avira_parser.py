@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from datetime import datetime as dt
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from maldump.parsers.kaitai.avira_parser import AviraParser as KaitaiParser
-from maldump.structures import QuarEntry, Parser
+from maldump.structures import Parser, QuarEntry
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -12,9 +12,7 @@ if TYPE_CHECKING:
 
 class AviraParser(Parser):
 
-    def parse_from_log(
-        self, data: Optional[dict[str, QuarEntry]] = None
-    ) -> dict[str, QuarEntry]:
+    def parse_from_log(self, _=None) -> dict[str, QuarEntry]:
         quarfiles = {}
         for metafile in self.location.glob("*.qua"):
             kt = KaitaiParser.from_file(metafile)

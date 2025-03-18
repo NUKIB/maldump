@@ -19,13 +19,11 @@ import binascii
 import re
 import struct
 import sys
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 from maldump.parsers.kaitai.eset_ndf_parser import EsetNdfParser as KaitaiParserMetadata
-from maldump.structures import QuarEntry, Parser
-
+from maldump.structures import Parser, QuarEntry
 from maldump.utils import DatetimeConverter as DTC
 
 __author__ = "Ladislav Baco"
@@ -118,7 +116,7 @@ def _extractFirstSeen(rawRecord):
         return ""
     littleEndianTimestamp = rawRecord[offset + 4 : offset + 8]
     timestamp = struct.unpack("<L", littleEndianTimestamp)[0]
-    return datetime.fromtimestamp(timestamp, UTC).strftime(TIMEFORMAT)
+    return datetime.fromtimestamp(timestamp, timezone.utc).strftime(TIMEFORMAT)
 
 
 def _extractTimestamp(rawRecord):
@@ -178,7 +176,7 @@ class EsetParser(Parser):
         # Quarantine folder per user
         self.quarpath = "Users/{username}/AppData/Local/ESET/ESET Security/Quarantine/"
         self.regex_user = re.compile(
-            r"Users[/\\]([^/\\]*)[/\\]AppData[/\\]Local[/\\]ESET[/\\]ESET Security[/\\]Quarantine[/\\]"
+            r"Users[/\\]([^/\\]*)[/\\]AppData[/\\]Local[/\\]ESET[/\\]ESET Security[/\\]Quarantine[/\\]"  # noqa: E501
         )
         self.regex_entry = re.compile(r"([0-9a-fA-F]+)\.NQF$")
 
@@ -208,9 +206,7 @@ class EsetParser(Parser):
         kt.close()
         return kt
 
-    def parse_from_log(
-        self, data: Optional[dict[tuple[str, datetime], QuarEntry]] = None
-    ) -> dict[tuple[str, datetime], QuarEntry]:
+    def parse_from_log(self, _=None) -> dict[tuple[str, datetime], QuarEntry]:
         quarfiles: dict[tuple[str, datetime], QuarEntry] = {}
 
         for metadata in mainParsing(self.location):
@@ -226,7 +222,7 @@ class EsetParser(Parser):
         return quarfiles
 
     def parse_from_fs(
-        self, data: Optional[dict[tuple[str, datetime], QuarEntry]] = None
+        self, data: dict[tuple[str, datetime], QuarEntry] | None = None
     ) -> dict[tuple[str, datetime], QuarEntry]:
         quarfiles = {}
 

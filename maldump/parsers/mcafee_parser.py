@@ -4,12 +4,12 @@ import re
 import sys
 import zipfile
 from datetime import datetime as dt
-from typing import TYPE_CHECKING, TypedDict, Optional
+from typing import TYPE_CHECKING, TypedDict
 from zipfile import ZipFile
 
 import defusedxml.ElementTree as ET
 
-from maldump.structures import QuarEntry, Parser
+from maldump.structures import Parser, QuarEntry
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -36,7 +36,7 @@ class McafeeParser(Parser):
         pass
 
     def parse_from_fs(
-        self, data: Optional[dict[str, QuarEntry]] = None
+        self, _: dict[str, QuarEntry] | None = None
     ) -> dict[str, QuarEntry]:
         quarfiles = {}
 

@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import sqlite3
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
-from maldump.structures import QuarEntry, Parser
-from maldump.utils import xor
+from maldump.structures import Parser, QuarEntry
 from maldump.utils import DatetimeConverter as DTC
+from maldump.utils import xor
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -30,9 +30,7 @@ class KasperskyParser(Parser):
         with open(file, "rb") as f:
             return xor(f.read(), key)
 
-    def parse_from_log(
-        self, data: Optional[dict[str, QuarEntry]] = None
-    ) -> dict[str, QuarEntry]:
+    def parse_from_log(self, _=None) -> dict[str, QuarEntry]:
         quarfiles = {}
 
         try:
@@ -59,7 +57,7 @@ class KasperskyParser(Parser):
         return quarfiles
 
     def parse_from_fs(
-        self, data: Optional[dict[str, QuarEntry]] = None
+        self, data: dict[str, QuarEntry] | None = None
     ) -> dict[str, QuarEntry]:
         quarfiles = {}
 

@@ -2,7 +2,8 @@
 Convenience utils for use in avs and parsers
 """
 
-from datetime import datetime, UTC
+import contextlib
+from datetime import datetime, timezone
 
 from arc4 import ARC4
 
@@ -32,29 +33,27 @@ class RawTimeConverter:
         wintime = int.from_bytes(wintime_bytes, byteorder="little")
         magic_number = 11644473600
         timestamp = (wintime // 10000000) - magic_number
-        return datetime.fromtimestamp(timestamp, tz=UTC)
+        return datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
     def _decode_unix(self, unixtime_bytes):
         timestamp = int.from_bytes(unixtime_bytes, byteorder="little")
-        return datetime.fromtimestamp(timestamp, tz=UTC)
+        return datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
     def decode(self, wintime_bytes: bytes) -> datetime:
         if self.time_type == "windows":
             return self._decode_windows(wintime_bytes)
-        elif self.time_type == "unix":
+
+        if self.time_type == "unix":
             return self._decode_unix(wintime_bytes)
-        else:
-            raise NotImplementedError
+
+        raise NotImplementedError
 
 
 class DatetimeConverter:
     @staticmethod
     def get_dt_from_stat(stat) -> datetime:
         ctime = stat.st_ctime_ns
-        try:
+        with contextlib.suppress(AttributeError):
             ctime = stat.st_birthtime_ns
-        except AttributeError:
-            # logging
-            pass
 
         return datetime.fromtimestamp(ctime // 1000000000)
