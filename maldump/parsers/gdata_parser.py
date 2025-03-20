@@ -7,7 +7,6 @@ from maldump.structures import Parser, QuarEntry
 
 
 class GdataParser(Parser):
-
     def parse_from_log(self, data=None):
         pass
 

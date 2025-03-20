@@ -7,7 +7,6 @@ from maldump.structures import Parser, QuarEntry
 
 
 class AviraParser(Parser):
-
     def parse_from_log(self, _=None) -> dict[str, QuarEntry]:
         quarfiles = {}
         for metafile in self.location.glob("*.qua"):

@@ -9,7 +9,6 @@ from maldump.utils import xor
 
 
 class KasperskyParser(Parser):
-
     def _normalize_time(self, number: int) -> datetime:
         year = (number >> 48) & 0xFFFF
         month = (number >> 40) & 0xFF
