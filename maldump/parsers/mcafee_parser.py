@@ -4,15 +4,12 @@ import re
 import sys
 import zipfile
 from datetime import datetime as dt
-from typing import TYPE_CHECKING, TypedDict
+from typing import TypedDict
 from zipfile import ZipFile
 
 import defusedxml.ElementTree as ET
 
 from maldump.structures import Parser, QuarEntry
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 class McafeeFileData(TypedDict):

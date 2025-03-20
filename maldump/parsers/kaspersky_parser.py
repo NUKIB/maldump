@@ -2,14 +2,10 @@ from __future__ import annotations
 
 import sqlite3
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 from maldump.structures import Parser, QuarEntry
 from maldump.utils import DatetimeConverter as DTC
 from maldump.utils import xor
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 class KasperskyParser(Parser):

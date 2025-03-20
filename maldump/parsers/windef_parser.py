@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime as dt
-from typing import TYPE_CHECKING
 
 from kaitaistruct import KaitaiStructError
 
@@ -11,9 +10,6 @@ from maldump.parsers.kaitai.windef_resource_data import (
 )
 from maldump.structures import Parser, QuarEntry
 from maldump.utils import DatetimeConverter as DTC
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 class WindowsDefenderParser(Parser):

@@ -1,13 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime as dt
-from typing import TYPE_CHECKING
 
 from maldump.parsers.kaitai.gdata_parser import GdataParser as KaitaiParser
 from maldump.structures import Parser, QuarEntry
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 class GdataParser(Parser):
