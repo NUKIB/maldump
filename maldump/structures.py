@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 if TYPE_CHECKING:
     from datetime import datetime as dt
@@ -63,7 +63,7 @@ class Quarantine(ABC):
     def export(self) -> list[QuarEntry]: ...
 
 
-class Parser(ABC):
+class Parser(ABC, Generic[T]):
     """Abstract class describing parsers"""
 
     @abstractmethod
@@ -83,7 +83,7 @@ class Parser(ABC):
         """
         self.name = name
         self.location = location
-        data = {}
+        data: dict[T, QuarEntry] = {}
 
         data_step = self.parse_from_log(data)
         if data_step is not None:
