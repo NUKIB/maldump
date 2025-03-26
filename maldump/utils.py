@@ -7,6 +7,8 @@ from datetime import datetime, timezone
 
 from arc4 import ARC4
 
+from maldump.constants import OperatingSystem
+
 
 def xor(plaintext: bytes, key: bytes) -> bytes:
     result = bytearray(plaintext)
@@ -40,10 +42,10 @@ class RawTimeConverter:
         return datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
     def decode(self, time_bytes: bytes) -> datetime:
-        if self.time_type == "windows":
+        if self.time_type == OperatingSystem.WINDOWS:
             return self._decode_windows(time_bytes)
 
-        if self.time_type == "unix":
+        if self.time_type == OperatingSystem.UNIX:
             return self._decode_unix(time_bytes)
 
         raise NotImplementedError
