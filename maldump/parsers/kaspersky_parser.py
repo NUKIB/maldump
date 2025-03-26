@@ -3,6 +3,7 @@ from __future__ import annotations
 import sqlite3
 from datetime import datetime
 
+from maldump.constants import ThreatMetadata
 from maldump.structures import Parser, QuarEntry
 from maldump.utils import DatetimeConverter as DTC
 from maldump.utils import xor
@@ -75,7 +76,7 @@ class KasperskyParser(Parser):
             q.path = str(entry)
             q.timestamp = timestamp
             q.size = size
-            q.threat = "Unknown-no-metadata"
+            q.threat = ThreatMetadata.UNKNOWN_THREAT
             q.malfile = malfile
             quarfiles[filename] = q
 

@@ -7,6 +7,7 @@ from os import unlink
 
 import defusedxml.ElementTree as ET
 
+from maldump.constants import ThreatMetadata
 from maldump.structures import Parser, QuarEntry
 from maldump.utils import DatetimeConverter as DTC
 from maldump.utils import xor
@@ -112,7 +113,7 @@ class AVGParser(Parser):
             q.path = str(entry)
             q.timestamp = timestamp
             q.size = size
-            q.threat = "Unknown-no-metadata"
+            q.threat = ThreatMetadata.UNKNOWN_THREAT
             q.malfile = malfile
             quarfiles[chest_id] = q
 

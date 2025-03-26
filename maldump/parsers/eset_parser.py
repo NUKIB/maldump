@@ -22,6 +22,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from maldump.constants import ThreatMetadata
 from maldump.parsers.kaitai.eset_ndf_parser import EsetNdfParser as KaitaiParserMetadata
 from maldump.structures import Parser, QuarEntry
 from maldump.utils import DatetimeConverter as DTC
@@ -248,7 +249,7 @@ class EsetParser(Parser):
             path = str(entry)
             sha1 = None
             size = entry_stat.st_size
-            threat = "Unknown-no-metadata"
+            threat = ThreatMetadata.UNKNOWN_THREAT
 
             kt = self._get_metadata(entry.parent, objhash)
             if kt is not None:

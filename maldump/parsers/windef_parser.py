@@ -4,6 +4,7 @@ from datetime import datetime as dt
 
 from kaitaistruct import KaitaiStructError
 
+from maldump.constants import ThreatMetadata
 from maldump.parsers.kaitai.windef_entries import WindefEntries as KaitaiParserEntries
 from maldump.parsers.kaitai.windef_resource_data import (
     WindefResourceData as KaitaiParserResourceData,
@@ -82,7 +83,7 @@ class WindowsDefenderParser(Parser):
             q.path = str(entry)
             q.timestamp = timestamp
             q.size = kt_data.encryptedfile.len_malfile
-            q.threat = "Unknown-no-metadata"
+            q.threat = ThreatMetadata.UNKNOWN_THREAT
             q.malfile = malfile
 
             quarfiles[guid] = q
