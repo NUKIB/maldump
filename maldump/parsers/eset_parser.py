@@ -16,12 +16,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import annotations
 
 import binascii
+import re
 import struct
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
-from maldump.structures import QuarEntry
+from maldump.constants import ThreatMetadata
+from maldump.parsers.kaitai.eset_ndf_parser import EsetNdfParser as KaitaiParserMetadata
+from maldump.structures import Parser, QuarEntry
+from maldump.utils import DatetimeConverter as DTC
 
 __author__ = "Ladislav Baco"
 __copyright__ = "Copyright (C) 2017"
@@ -113,7 +117,7 @@ def _extractFirstSeen(rawRecord):
         return ""
     littleEndianTimestamp = rawRecord[offset + 4 : offset + 8]
     timestamp = struct.unpack("<L", littleEndianTimestamp)[0]
-    return datetime.utcfromtimestamp(timestamp).strftime(TIMEFORMAT)
+    return datetime.fromtimestamp(timestamp, timezone.utc).strftime(TIMEFORMAT)
 
 
 def _extractTimestamp(rawRecord):
@@ -168,10 +172,14 @@ def mainParsing(virlog_path):
     return parsedRecords
 
 
-class EsetParser:
+class EsetParser(Parser):
     def __init__(self):
         # Quarantine folder per user
         self.quarpath = "Users/{username}/AppData/Local/ESET/ESET Security/Quarantine/"
+        self.regex_user = re.compile(
+            r"Users[/\\]([^/\\]*)[/\\]AppData[/\\]Local[/\\]ESET[/\\]ESET Security[/\\]Quarantine[/\\]"  # noqa: E501
+        )
+        self.regex_entry = re.compile(r"([0-9a-fA-F]+)\.NQF$")
 
     def _decrypt(self, data: bytes) -> bytes:
         return bytes([((b - 84) % 256) ^ 0xA5 for b in data])
@@ -184,15 +192,24 @@ class EsetParser:
                 data = f.read()
                 decrypted_data = self._decrypt(data)
         except OSError:
+            # logging
             print("Eset Error: could not read file", quarfile)
 
         return decrypted_data
 
-    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
-        self.name = name
-        self.location = location
+    def _get_metadata(self, path: Path, objhash: str) -> KaitaiParserMetadata | None:
+        # metadata file has .NDF extension
+        metadata_path = path / (objhash + ".NDF")
+        if not metadata_path.is_file():
+            return None
 
-        quarfiles = []
+        kt = KaitaiParserMetadata.from_file(metadata_path)
+        kt.close()
+        return kt
+
+    def parse_from_log(self, _=None) -> dict[tuple[str, datetime], QuarEntry]:
+        quarfiles: dict[tuple[str, datetime], QuarEntry] = {}
+
         for metadata in mainParsing(self.location):
             if metadata["user"] == "SYSTEM":
                 continue
@@ -201,6 +218,55 @@ class EsetParser:
             q.threat = metadata["infiltration"]
             q.path = metadata["obj"]
             q.malfile = self._get_malfile(metadata["user"], metadata["objhash"])
-            quarfiles.append(q)
+            quarfiles[q.sha1, metadata["user"]] = q
+
+        return quarfiles
+
+    def parse_from_fs(
+        self, data: dict[tuple[str, datetime], QuarEntry] | None = None
+    ) -> dict[tuple[str, datetime], QuarEntry]:
+        quarfiles = {}
+
+        actual_path = Path("Users/")
+        for entry in actual_path.glob(
+            "*/AppData/Local/ESET/ESET Security/Quarantine/*.NQF"
+        ):
+            res_path = re.match(self.regex_entry, entry.name)
+            res_user = re.match(self.regex_user, str(entry))
+
+            if not res_path:
+                continue
+
+            user = res_user.group(1)
+            objhash = res_path.group(1)
+
+            if (objhash.lower(), user) in data:
+                continue
+
+            entry_stat = entry.stat()
+
+            timestamp = DTC.get_dt_from_stat(entry_stat)
+            path = str(entry)
+            sha1 = None
+            size = entry_stat.st_size
+            threat = ThreatMetadata.UNKNOWN_THREAT
+
+            kt = self._get_metadata(entry.parent, objhash)
+            if kt is not None:
+                timestamp = kt.datetime_unix.date_time
+                path = kt.findings[0].mal_path.str_cont
+                sha1 = hex(int.from_bytes(kt.mal_hash_sha1, "big")).lstrip("0x")
+                size = kt.mal_size
+                threat = kt.findings[0].threat_canonized.str_cont
+
+            q = QuarEntry()
+            q.timestamp = timestamp
+            q.path = path
+            q.sha1 = sha1
+            q.size = size
+            q.threat = threat
+            q.malfile = self._get_malfile(user, objhash)
+
+            quarfiles[q.sha1, user] = q
 
         return quarfiles

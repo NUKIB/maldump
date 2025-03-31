@@ -4,18 +4,16 @@ import sqlite3
 import tempfile
 from datetime import datetime as dt
 from os import unlink
-from typing import TYPE_CHECKING
 
 import defusedxml.ElementTree as ET
 
-from maldump.structures import QuarEntry
+from maldump.constants import ThreatMetadata
+from maldump.structures import Parser, QuarEntry
+from maldump.utils import DatetimeConverter as DTC
 from maldump.utils import xor
 
-if TYPE_CHECKING:
-    from pathlib import Path
 
-
-class AVGParser:
+class AVGParser(Parser):
     # Cleanup
     def __del__(self):
         if hasattr(self, "db"):
@@ -59,15 +57,12 @@ class AVGParser:
             data = f.read()[8:]  # Strip magic bytes
             return xor(data, key)
 
-    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
-        self.name = name
-        self.location = location
-
+    def parse_from_log(self, _=None) -> dict[str, QuarEntry]:
         self._initDB()
-        quarfiles = []
+        quarfiles = {}
 
         # Return the value of a field 'f'
-        def get(e, f):
+        def get(e: ET, f) -> str:
             return e.find(f).text
 
         for e in self.root.findall("ChestEntry"):
@@ -86,6 +81,40 @@ class AVGParser:
             q.path = path
             q.malfile = malfile
 
-            quarfiles.append(q)
+            quarfiles[chest_id] = q
+
+        return quarfiles
+
+    def parse_from_fs(
+        self, data: dict[str, QuarEntry] | None = None
+    ) -> dict[str, QuarEntry]:
+        quarfiles = {}
+
+        # iterating over bigger files, which were not logged to vault.db
+        for entry in self.location.glob("*"):
+            chest_id = entry.name
+
+            if not entry.is_file():
+                continue
+
+            if chest_id == "index.xml":
+                continue
+
+            if chest_id in data:
+                continue
+
+            malfile = self._getRawFromFile(chest_id)
+
+            entry_stat = entry.stat()
+            timestamp = DTC.get_dt_from_stat(entry_stat)
+            size = entry_stat.st_size
+
+            q = QuarEntry()
+            q.path = str(entry)
+            q.timestamp = timestamp
+            q.size = size
+            q.threat = ThreatMetadata.UNKNOWN_THREAT
+            q.malfile = malfile
+            quarfiles[chest_id] = q
 
         return quarfiles

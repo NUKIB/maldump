@@ -4,15 +4,12 @@ import re
 import sys
 import zipfile
 from datetime import datetime as dt
-from typing import TYPE_CHECKING, TypedDict
+from typing import TypedDict
 from zipfile import ZipFile
 
 import defusedxml.ElementTree as ET
 
-from maldump.structures import QuarEntry
-
-if TYPE_CHECKING:
-    from pathlib import Path
+from maldump.structures import Parser, QuarEntry
 
 
 class McafeeFileData(TypedDict):
@@ -23,7 +20,7 @@ class McafeeFileData(TypedDict):
     mal_file: bytes
 
 
-class McafeeParser:
+class McafeeParser(Parser):
     """XML parser"""
 
     _zip_password = "infected"  # noqa: S105
@@ -32,10 +29,13 @@ class McafeeParser:
     _raw_malware = ""
     _xml_data = ""
 
-    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
-        self.name = name
-        self.location = location
-        quarfiles = []
+    def parse_from_log(self, data=None):
+        pass
+
+    def parse_from_fs(
+        self, _: dict[str, QuarEntry] | None = None
+    ) -> dict[str, QuarEntry]:
+        quarfiles = {}
 
         for metafile in self.location.glob("*.zip"):
             parser = self._get_data(file_name=metafile)
@@ -45,7 +45,7 @@ class McafeeParser:
             q.path = parser["file_name"]
             q.size = int(parser["size"])
             q.malfile = parser["mal_file"]
-            quarfiles.append(q)
+            quarfiles[str(metafile)] = q
 
         return quarfiles
 

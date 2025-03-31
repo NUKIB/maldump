@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import hashlib
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 if TYPE_CHECKING:
     from datetime import datetime as dt
     from pathlib import Path
+
+T = TypeVar("T")
 
 
 class QuarEntry:
@@ -61,8 +63,34 @@ class Quarantine(ABC):
     def export(self) -> list[QuarEntry]: ...
 
 
-class Parser(ABC):
+class Parser(ABC, Generic[T]):
     """Abstract class describing parsers"""
 
     @abstractmethod
-    def from_file(self, name: str, location: Path) -> list[QuarEntry]: ...
+    def parse_from_log(
+        self, data: dict[T, QuarEntry] | None = None
+    ) -> dict[T, QuarEntry] | None: ...
+
+    @abstractmethod
+    def parse_from_fs(
+        self, data: dict[T, QuarEntry] | None = None
+    ) -> dict[T, QuarEntry] | None: ...
+
+    def from_file(self, name: str, location: Path) -> list[QuarEntry]:
+        """
+        Template pattern function wrapper calling all the steps for retrieving
+        quarantine entries.
+        """
+        self.name = name
+        self.location = location
+        data: dict[T, QuarEntry] = {}
+
+        data_step = self.parse_from_log(data)
+        if data_step is not None:
+            data.update(data_step)
+
+        data_step = self.parse_from_fs(data)
+        if data_step is not None:
+            data.update(data_step)
+
+        return list(data.values())
