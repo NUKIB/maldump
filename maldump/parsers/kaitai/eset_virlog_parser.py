@@ -6,8 +6,12 @@ from enum import Enum
 import maldump.utils
 
 
-if getattr(kaitaistruct, 'API_VERSION', (0, 9)) < (0, 9):
-    raise Exception("Incompatible Kaitai Struct Python API: 0.9 or later is required, but you have %s" % (kaitaistruct.__version__))
+if getattr(kaitaistruct, "API_VERSION", (0, 9)) < (0, 9):
+    raise Exception(
+        "Incompatible Kaitai Struct Python API: 0.9 or later is required, but you have %s"
+        % (kaitaistruct.__version__)
+    )
+
 
 class EsetVirlogParser(KaitaiStruct):
 
@@ -46,6 +50,7 @@ class EsetVirlogParser(KaitaiStruct):
         path_name = 5116841
         infiltration_name = 5119309
         virus_db = 5121815
+
     def __init__(self, _io, _parent=None, _root=None):
         self._io = _io
         self._parent = _parent
@@ -54,8 +59,10 @@ class EsetVirlogParser(KaitaiStruct):
 
     def _read(self):
         self.magic = self._io.read_bytes(4)
-        if not self.magic == b"\x78\xF3\x9B\xCF":
-            raise kaitaistruct.ValidationNotEqualError(b"\x78\xF3\x9B\xCF", self.magic, self._io, u"/seq/0")
+        if not self.magic == b"\x78\xf3\x9b\xcf":
+            raise kaitaistruct.ValidationNotEqualError(
+                b"\x78\xf3\x9b\xcf", self.magic, self._io, "/seq/0"
+            )
         self.len_header = self._io.read_u4le()
         self._raw_header = self._io.read_bytes((self.len_header - 8))
         _io__raw_header = KaitaiStream(BytesIO(self._raw_header))
@@ -63,7 +70,6 @@ class EsetVirlogParser(KaitaiStruct):
         self.threats = []
         for i in range(self.header.num_threats):
             self.threats.append(EsetVirlogParser.Threat(self._io, self, self._root))
-
 
     class Widestr(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
@@ -74,13 +80,13 @@ class EsetVirlogParser(KaitaiStruct):
 
         def _read(self):
             self.len_str = self._io.read_u4le()
-            self.str = (self._io.read_bytes((self.len_str - 2))).decode(u"UTF-16LE")
+            self.str = (self._io.read_bytes((self.len_str - 2))).decode("UTF-16LE")
             if self.len_str != 0:
                 self.nullbytes = self._io.read_bytes(2)
                 if not self.nullbytes == b"\x00\x00":
-                    raise kaitaistruct.ValidationNotEqualError(b"\x00\x00", self.nullbytes, self._io, u"/types/widestr/seq/2")
-
-
+                    raise kaitaistruct.ValidationNotEqualError(
+                        b"\x00\x00", self.nullbytes, self._io, "/types/widestr/seq/2"
+                    )
 
     class Unixdate(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
@@ -91,9 +97,8 @@ class EsetVirlogParser(KaitaiStruct):
 
         def _read(self):
             self._raw_date_time = self._io.read_bytes(8)
-            _process = maldump.utils.RawTimeConverter(u"unix")
+            _process = maldump.utils.RawTimeConverter("unix")
             self.date_time = _process.decode(self._raw_date_time)
-
 
     class Hash(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
@@ -106,7 +111,6 @@ class EsetVirlogParser(KaitaiStruct):
             self.len_hash = self._io.read_u4le()
             self.hash = self._io.read_bytes(self.len_hash)
 
-
     class Header(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
             self._io = _io
@@ -118,14 +122,19 @@ class EsetVirlogParser(KaitaiStruct):
             self.num_threats = self._io.read_u4le()
             self.filesize = self._io.read_u8le()
             self.timsestamp = EsetVirlogParser.Windate(self._io, self, self._root)
-            self.windowsdatetime_unknown2 = EsetVirlogParser.Windate(self._io, self, self._root)
-            self.windowsdatetime_unknown3 = EsetVirlogParser.Windate(self._io, self, self._root)
+            self.windowsdatetime_unknown2 = EsetVirlogParser.Windate(
+                self._io, self, self._root
+            )
+            self.windowsdatetime_unknown3 = EsetVirlogParser.Windate(
+                self._io, self, self._root
+            )
             self.num_threats2 = self._io.read_u4le()
             _ = self.num_threats2
             if not _ == self.num_threats:
-                raise kaitaistruct.ValidationExprError(self.num_threats2, self._io, u"/types/header/seq/5")
+                raise kaitaistruct.ValidationExprError(
+                    self.num_threats2, self._io, "/types/header/seq/5"
+                )
             self.unknown = self._io.read_bytes_full()
-
 
     class Threat(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
@@ -136,13 +145,14 @@ class EsetVirlogParser(KaitaiStruct):
 
         def _read(self):
             self.magic = self._io.read_bytes(4)
-            if not self.magic == b"\xDC\xCF\x8B\x63":
-                raise kaitaistruct.ValidationNotEqualError(b"\xDC\xCF\x8B\x63", self.magic, self._io, u"/types/threat/seq/0")
+            if not self.magic == b"\xdc\xcf\x8b\x63":
+                raise kaitaistruct.ValidationNotEqualError(
+                    b"\xdc\xcf\x8b\x63", self.magic, self._io, "/types/threat/seq/0"
+                )
             self.len_record = self._io.read_u4le()
             self._raw_record = self._io.read_bytes((self.len_record - 8))
             _io__raw_record = KaitaiStream(BytesIO(self._raw_record))
             self.record = EsetVirlogParser.Record(_io__raw_record, self, self._root)
-
 
     class Epilogue(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
@@ -154,7 +164,6 @@ class EsetVirlogParser(KaitaiStruct):
         def _read(self):
             self.data = self._io.read_bytes_full()
 
-
     class Record(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
             self._io = _io
@@ -165,16 +174,21 @@ class EsetVirlogParser(KaitaiStruct):
         def _read(self):
             self.record_header_magic = self._io.read_bytes(8)
             if not self.record_header_magic == b"\x24\x00\x00\x00\x01\x00\x01\x00":
-                raise kaitaistruct.ValidationNotEqualError(b"\x24\x00\x00\x00\x01\x00\x01\x00", self.record_header_magic, self._io, u"/types/record/seq/0")
+                raise kaitaistruct.ValidationNotEqualError(
+                    b"\x24\x00\x00\x00\x01\x00\x01\x00",
+                    self.record_header_magic,
+                    self._io,
+                    "/types/record/seq/0",
+                )
             self.record_id = self._io.read_u4le()
             self.win_timestamp = EsetVirlogParser.Windate(self._io, self, self._root)
-            self.filler = self._io.read_bytes(4)
-            if not self.filler == b"\x00\x00\x00\x00":
-                raise kaitaistruct.ValidationNotEqualError(b"\x00\x00\x00\x00", self.filler, self._io, u"/types/record/seq/3")
+            self.unknown_u4int0 = self._io.read_u4le()
             self.record_id2 = self._io.read_u4le()
             _ = self.record_id2
             if not _ == self.record_id:
-                raise kaitaistruct.ValidationExprError(self.record_id2, self._io, u"/types/record/seq/4")
+                raise kaitaistruct.ValidationExprError(
+                    self.record_id2, self._io, "/types/record/seq/4"
+                )
             self.unknown_u4int1 = self._io.read_u4le()
             self.unknown_u4int2 = self._io.read_u4le()
             self.unknown_u4int3 = self._io.read_u4le()
@@ -183,8 +197,6 @@ class EsetVirlogParser(KaitaiStruct):
             while not self._io.is_eof():
                 self.data_fields.append(EsetVirlogParser.Op(self._io, self, self._root))
                 i += 1
-
-
 
     class Windate(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
@@ -195,9 +207,8 @@ class EsetVirlogParser(KaitaiStruct):
 
         def _read(self):
             self._raw_date_time = self._io.read_bytes(8)
-            _process = maldump.utils.RawTimeConverter(u"windows")
+            _process = maldump.utils.RawTimeConverter("windows")
             self.date_time = _process.decode(self._raw_date_time)
-
 
     class Op(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
@@ -207,7 +218,9 @@ class EsetVirlogParser(KaitaiStruct):
             self._read()
 
         def _read(self):
-            self.name = KaitaiStream.resolve_enum(EsetVirlogParser.Opcode, self._io.read_u4le())
+            self.name = KaitaiStream.resolve_enum(
+                EsetVirlogParser.Opcode, self._io.read_u4le()
+            )
             _on = self.name
             if _on == EsetVirlogParser.Opcode.unknown_u1int1:
                 self.arg = self._io.read_u1()
@@ -277,6 +290,3 @@ class EsetVirlogParser(KaitaiStruct):
                 self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
             elif _on == EsetVirlogParser.Opcode.unknown_u4int11:
                 self.arg = self._io.read_u4le()
-
-
-

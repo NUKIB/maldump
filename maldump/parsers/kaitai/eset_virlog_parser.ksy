@@ -57,9 +57,8 @@ types:
         type: u4
       - id: win_timestamp
         type: windate
-      - id: filler
-        size: 0x04
-        contents: [ 0x00, 0x00, 0x00, 0x00 ]
+      - id: unknown_u4int0
+        type: u4
       - id: record_id2   # this should be equal to record_id
         valid:
           expr: _ == record_id
@@ -142,6 +141,7 @@ types:
       - id: date_time
         size: 0x08
         process: maldump.utils.raw_time_converter( "windows" )
+
   unixdate:
     seq:
       - id: date_time
