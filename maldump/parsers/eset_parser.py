@@ -254,10 +254,10 @@ class EsetParser(Parser):
             kt = self._get_metadata(entry.parent, objhash)
             if kt is not None:
                 timestamp = kt.datetime_unix.date_time
-                path = kt.findings[0].mal_path.str_cont
+                path = kt.findings[0].mal_path.str
                 sha1 = hex(int.from_bytes(kt.mal_hash_sha1, "big")).lstrip("0x")
                 size = kt.mal_size
-                threat = kt.findings[0].threat_canonized.str_cont
+                threat = kt.findings[0].threat_canonized.str
 
             q = QuarEntry()
             q.timestamp = timestamp
