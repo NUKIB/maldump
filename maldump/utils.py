@@ -29,7 +29,7 @@ class CustomArc4:
 
 class RawTimeConverter:
     def __init__(self, time_type: str):
-        self.time_type = time_type
+        self.time_type = OperatingSystem(time_type)
 
     def _decode_windows(self, wintime_bytes: bytes) -> datetime:
         wintime = int.from_bytes(wintime_bytes, byteorder="little")

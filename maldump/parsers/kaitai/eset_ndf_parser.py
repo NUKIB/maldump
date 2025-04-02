@@ -117,5 +117,5 @@ class EsetNdfParser(KaitaiStruct):
             self._read()
 
         def _read(self):
-            self.str_len = self._io.read_u4le()
-            self.str_cont = (self._io.read_bytes((2 * self.str_len))).decode("UTF-16LE")
+            self.len_str = self._io.read_u4le()
+            self.str = (self._io.read_bytes((2 * self.len_str))).decode("UTF-16LE")
