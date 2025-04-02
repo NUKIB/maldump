@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import annotations
 
 import re
-from datetime import datetime
+import typing
 from pathlib import Path
 
 from maldump.constants import ThreatMetadata
@@ -24,6 +24,9 @@ from maldump.parsers.kaitai.eset_ndf_parser import EsetNdfParser as KaitaiParser
 from maldump.parsers.kaitai.eset_virlog_parser import EsetVirlogParser
 from maldump.structures import Parser, QuarEntry
 from maldump.utils import DatetimeConverter as DTC
+
+if typing.TYPE_CHECKING:
+    from datetime import datetime
 
 __author__ = "Ladislav Baco"
 __copyright__ = "Copyright (C) 2017"
@@ -49,29 +52,23 @@ def parseRecord(record: dict):
 
 
 def convertToDict(parser: EsetVirlogParser):
-    values = [
+    return [
         {
             **{
                 y.name.name: y.arg if hasattr(y, "arg") else None
                 for y in x.record.data_fields
             },
-            **{"timestamp": x.record.win_timestamp.date_time},
+            "timestamp": x.record.win_timestamp.date_time,
         }
         for x in parser.threats
     ]
-
-    return values
 
 
 def mainParsing(virlog_path):
     parser = EsetVirlogParser.from_file(filename=virlog_path)
     threats = convertToDict(parser)
 
-    parsedRecords = []
-    for record in threats:
-        parsedRecords.append(parseRecord(record))
-
-    return parsedRecords
+    return [parseRecord(record) for record in threats]
 
 
 class EsetParser(Parser):
