@@ -15,15 +15,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 
-import binascii
 import re
-import struct
-import sys
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 from maldump.constants import ThreatMetadata
 from maldump.parsers.kaitai.eset_ndf_parser import EsetNdfParser as KaitaiParserMetadata
+from maldump.parsers.kaitai.eset_virlog_parser import EsetVirlogParser
 from maldump.structures import Parser, QuarEntry
 from maldump.utils import DatetimeConverter as DTC
 
@@ -35,139 +33,43 @@ __version__ = "0.2.1"
 __maintainer__ = "Ladislav Baco"
 __status__ = "Development"
 
-TIMEFORMAT = "%Y-%m-%d %H:%M:%S"
-NULL = b"\x00\x00"
-RECORD_HEADER = b"\x24\x00\x00\x00\x01\x00\x01\x00"
-OBJECT_HEADER = b"\xbe\x0b\x4e\x00"
-INFILTRATION_HEADER = b"\x4d\x1d\x4e\x00"
-USER_HEADER = b"\xee\x03\x4e\x00"
-VIRUSDB_HEADER = b"\x17\x27\x4e\x00"
-PROGNAME_HEADER = b"\xc4\x0b\x4e\x00"
-PROGHASH_HEADER = b"\x9d\x13\x42\x00"
-OBJECTHASH_HEADER = b"\x9e\x13\x42\x00"
-FIRSTSEEN_HEADER = b"\x9f\x13\x46\x00"
 
-_dataTypeHeaders = {
-    "Object": OBJECT_HEADER,
-    "Infiltration": INFILTRATION_HEADER,
-    "User": USER_HEADER,
-    "VirusDB": VIRUSDB_HEADER,
-    "ProgName": PROGNAME_HEADER,
-}
-_hashTypeHeaders = {"ObjectHash": OBJECTHASH_HEADER, "ProgHash": PROGHASH_HEADER}
-
-
-def eprint(*args, **kwargs):
-    """Prints debug messages to stderr"""
-    print(*args, file=sys.stderr, **kwargs)
-
-
-def _infoNotFound(field):
-    eprint("Eset Info: field not found: " + field)
-
-
-def _warningUnexpected(field):
-    eprint("Eset Warning: unexpected bytes in field " + field)
-
-
-def _winToUnixTimestamp(winTimestamp):
-    magicNumber = 11644473600
-    return (winTimestamp / 10000000) - magicNumber
-
-
-def _extractDataType(dataType, rawRecord):
-    # Format: dataType_HEADER + '??' + NULL + objectData + NULL
-
-    dataType_HEADER = _dataTypeHeaders[dataType]
-    dataOffset = rawRecord.find(dataType_HEADER)
-    if dataOffset < 0:
-        _infoNotFound(dataType)
-        return ""
-    if rawRecord[dataOffset + 6 : dataOffset + 8] != NULL:
-        _warningUnexpected(dataType)
-    # find NULL char, but search for (\x00)*3, because third zero byte is part of
-    # last widechar
-    dataEnd = dataOffset + 8 + 1 + rawRecord[dataOffset + 8 :].find(b"\x00" + NULL)
-    dataWideChar = rawRecord[dataOffset + 8 : dataEnd]
-    return dataWideChar.decode("utf-16")
-
-
-def _extractHashType(hashType, rawRecord):
-    # Format: hashType_HEADER + '??' + NULL + hashData[20]
-
-    hashType_HEADER = _hashTypeHeaders[hashType]
-    hashOffset = rawRecord.find(hashType_HEADER)
-    if hashOffset < 0:
-        _infoNotFound(hashType)
-        return ""
-    if rawRecord[hashOffset + 6 : hashOffset + 8] != NULL:
-        _warningUnexpected(hashType)
-    hashEnd = hashOffset + 8 + 20
-    hashHex = rawRecord[hashOffset + 8 : hashEnd]
-    # return hashHex.encode('hex')
-    return binascii.hexlify(hashHex).decode("utf-8")
-
-
-def _extractFirstSeen(rawRecord):
-    # Format: FIRSTSEEN_HEADER + UnixTimestamp[4]
-
-    offset = rawRecord.find(FIRSTSEEN_HEADER)
-    if offset < 0:
-        _infoNotFound("FirstSeen")
-        return ""
-    littleEndianTimestamp = rawRecord[offset + 4 : offset + 8]
-    timestamp = struct.unpack("<L", littleEndianTimestamp)[0]
-    return datetime.fromtimestamp(timestamp, timezone.utc).strftime(TIMEFORMAT)
-
-
-def _extractTimestamp(rawRecord):
-    # Format: RECORD_HEADER + ID[4] + MicrosoftTimestamp[8]
-
-    littleEndianTimestamp = rawRecord[4:12]
-    winTimestamp = struct.unpack("<Q", littleEndianTimestamp)[0]
-    timestamp = _winToUnixTimestamp(winTimestamp)
-    return datetime.fromtimestamp(int(timestamp))
-
-
-def _checkID(recordId, rawRecord):
-    littleEndianIds = [rawRecord[0:4], rawRecord[16:20]]
-    for littleEndianId in littleEndianIds:
-        if struct.unpack("<L", littleEndianId)[0] != recordId:
-            _warningUnexpected("ID")
-
-
-def getRawRecords(rawData):
-    rawRecords = rawData.split(RECORD_HEADER)[1:]
-    ziprecords = zip(range(len(rawRecords)), rawRecords)
-    records = []
-    for recordId, rawRecord in ziprecords:
-        _checkID(recordId, rawRecord)
-        # create 2D array instead of zip-object in Python 3
-        records.append((recordId, rawRecord))
-    return records
-
-
-def parseRecord(rawRecord):
+def parseRecord(record: dict):
     return {
-        "timestamp": _extractTimestamp(rawRecord),
-        "virusdb": _extractDataType("VirusDB", rawRecord),
-        "obj": _extractDataType("Object", rawRecord),
-        "objhash": _extractHashType("ObjectHash", rawRecord),
-        "infiltration": _extractDataType("Infiltration", rawRecord),
-        "user": _extractDataType("User", rawRecord).split("\\")[1],
-        "progname": _extractDataType("ProgName", rawRecord),
-        "proghash": _extractHashType("ProgHash", rawRecord),
-        "firstseen": _extractFirstSeen(rawRecord),
+        "timestamp": record.get("timestamp"),
+        "virusdb": record.get("virus_db").str,
+        "obj": record.get("object_name").str,
+        "objhash": record.get("object_hash").hash.hex(),
+        "infiltration": record.get("infiltration_name").str,
+        "user": record.get("user_name").str.split("\\")[1],
+        "progname": record.get("program_name").str,
+        "proghash": record.get("program_hash").hash.hex(),
+        "firstseen": record.get("firstseen"),
     }
 
 
+def convertToDict(parser: EsetVirlogParser):
+    values = [
+        {
+            **{
+                y.name.name: y.arg if hasattr(y, "arg") else None
+                for y in x.record.data_fields
+            },
+            **{"timestamp": x.record.win_timestamp.date_time},
+        }
+        for x in parser.threats
+    ]
+
+    return values
+
+
 def mainParsing(virlog_path):
-    with open(virlog_path, "rb") as f:
-        virlog_data = f.read()
-    rawRecords = getRawRecords(virlog_data)
+    parser = EsetVirlogParser.from_file(filename=virlog_path)
+    threats = convertToDict(parser)
+
     parsedRecords = []
-    for _, rawRecord in rawRecords:
-        parsedRecords.append(parseRecord(rawRecord))
+    for record in threats:
+        parsedRecords.append(parseRecord(record))
 
     return parsedRecords
 
