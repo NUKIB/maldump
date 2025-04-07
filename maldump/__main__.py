@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import ctypes
+import getpass
 import io
 import logging
 import os
@@ -30,6 +31,9 @@ def main() -> None:
 
     # Admin privileges are required for optimal function (windows only)
     if sys.platform == "win32" and not ctypes.windll.shell32.IsUserAnAdmin():
+        logging.critical(
+            "The program tried to be executed on Windows machine without proper privileges"
+        )
         print("Please try again with admin privileges")
         sys.exit(1)
 
@@ -39,8 +43,14 @@ def main() -> None:
     # Switch to root partition
     os.chdir(args.root_dir)
 
+    logging.debug(
+        'Working in directory "%s", files would be stored into "%s"', os.getcwd(), dest
+    )
+
     # Get a list of all installed avs
     avs = AVManager.detect()
+
+    logging.debug("Detected AVs: %s", [av.name for av in avs])
 
     if args.quar:
         export_files(avs, dest)
