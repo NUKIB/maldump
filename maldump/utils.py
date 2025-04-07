@@ -3,6 +3,7 @@ Convenience utils for use in avs and parsers
 """
 
 import contextlib
+import logging
 from datetime import datetime, timezone
 
 from arc4 import ARC4
@@ -55,8 +56,11 @@ class DatetimeConverter:
     @staticmethod
     # type: ignore
     def get_dt_from_stat(stat) -> datetime:
+        logging.debug("Getting datetime from stat")
         ctime = stat.st_ctime_ns
         with contextlib.suppress(AttributeError):
+            logging.debug("Trying to extract birthtime")
             ctime = stat.st_birthtime_ns
+            logging.debug("Birthtime extracted successfully")
 
         return datetime.fromtimestamp(ctime // 1000000000)
