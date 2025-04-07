@@ -32,7 +32,7 @@ def main() -> None:
     # Admin privileges are required for optimal function (windows only)
     if sys.platform == "win32" and not ctypes.windll.shell32.IsUserAnAdmin():
         logging.critical(
-            "The program tried to be executed on Windows machine without proper privileges"
+            "The program executed on Windows machine without proper privileges"
         )
         print("Please try again with admin privileges")
         sys.exit(1)
@@ -192,7 +192,7 @@ def parse_cli() -> argparse.Namespace:
 def init_logging(log_level: str):
     numeric_level = getattr(logging, log_level.upper(), None)
     if not isinstance(numeric_level, int):
-        raise ValueError("Invalid log level: " + log_level)
+        raise ValueError("Invalid log level: " + log_level)  # noqa: TRY004
 
     logging.basicConfig(
         handlers=[
