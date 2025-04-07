@@ -16,11 +16,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import annotations
 
 import binascii
+import logging
 import re
 import struct
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+from kaitaistruct import KaitaiStructError
 
 from maldump.constants import ThreatMetadata
 from maldump.parsers.kaitai.eset_ndf_parser import EsetNdfParser as KaitaiParserMetadata
@@ -57,25 +60,22 @@ _dataTypeHeaders = {
 _hashTypeHeaders = {"ObjectHash": OBJECTHASH_HEADER, "ProgHash": PROGHASH_HEADER}
 
 
-def eprint(*args, **kwargs):
-    """Prints debug messages to stderr"""
-    print(*args, file=sys.stderr, **kwargs)
-
-
 def _infoNotFound(field):
-    eprint("Eset Info: field not found: " + field)
+    logging.info("Parsing data in ESET led to field not found: %s", field)
 
 
 def _warningUnexpected(field):
-    eprint("Eset Warning: unexpected bytes in field " + field)
+    logging.warning("Parsing data in ESET found unexpected bytes in field %s", field)
 
 
 def _winToUnixTimestamp(winTimestamp):
+    logging.debug("Converting Windows to Unix time")
     magicNumber = 11644473600
     return (winTimestamp / 10000000) - magicNumber
 
 
 def _extractDataType(dataType, rawRecord):
+    logging.debug("Extracting data, type: %s", dataType)
     # Format: dataType_HEADER + '??' + NULL + objectData + NULL
 
     dataType_HEADER = _dataTypeHeaders[dataType]
@@ -93,6 +93,7 @@ def _extractDataType(dataType, rawRecord):
 
 
 def _extractHashType(hashType, rawRecord):
+    logging.debug("Extracting hash, type %s", hashType)
     # Format: hashType_HEADER + '??' + NULL + hashData[20]
 
     hashType_HEADER = _hashTypeHeaders[hashType]
@@ -109,6 +110,7 @@ def _extractHashType(hashType, rawRecord):
 
 
 def _extractFirstSeen(rawRecord):
+    logging.debug("Extracting first seen")
     # Format: FIRSTSEEN_HEADER + UnixTimestamp[4]
 
     offset = rawRecord.find(FIRSTSEEN_HEADER)
@@ -121,6 +123,7 @@ def _extractFirstSeen(rawRecord):
 
 
 def _extractTimestamp(rawRecord):
+    logging.debug("Extracting timestamp")
     # Format: RECORD_HEADER + ID[4] + MicrosoftTimestamp[8]
 
     littleEndianTimestamp = rawRecord[4:12]
@@ -130,6 +133,7 @@ def _extractTimestamp(rawRecord):
 
 
 def _checkID(recordId, rawRecord):
+    logging.debug("Checking record ID")
     littleEndianIds = [rawRecord[0:4], rawRecord[16:20]]
     for littleEndianId in littleEndianIds:
         if struct.unpack("<L", littleEndianId)[0] != recordId:
@@ -137,13 +141,19 @@ def _checkID(recordId, rawRecord):
 
 
 def getRawRecords(rawData):
+    logging.debug("Getting raw records from data")
     rawRecords = rawData.split(RECORD_HEADER)[1:]
+    if not rawRecords:
+        logging.info("No records found in raw data")
+        return []
+
     ziprecords = zip(range(len(rawRecords)), rawRecords)
     records = []
     for recordId, rawRecord in ziprecords:
         _checkID(recordId, rawRecord)
         # create 2D array instead of zip-object in Python 3
         records.append((recordId, rawRecord))
+    logging.debug("Raw records extracted")
     return records
 
 
@@ -162,11 +172,19 @@ def parseRecord(rawRecord):
 
 
 def mainParsing(virlog_path):
-    with open(virlog_path, "rb") as f:
-        virlog_data = f.read()
+    try:
+        logging.debug('Trying to open virlog file, path "%s"', virlog_path)
+        with open(virlog_path, "rb") as f:
+            virlog_data = f.read()
+    except OSError as e:
+        logging.error(
+            'Cannot open virlog file in ESET on path "%s"', virlog_path, exc_info=e
+        )
+        return []
     rawRecords = getRawRecords(virlog_data)
     parsedRecords = []
-    for _, rawRecord in rawRecords:
+    for idx, rawRecord in rawRecords:
+        logging.debug("Parsing raw record %s/%s", idx + 1, len(rawRecords))
         parsedRecords.append(parseRecord(rawRecord))
 
     return parsedRecords
@@ -182,36 +200,59 @@ class EsetParser(Parser):
         self.regex_entry = re.compile(r"([0-9a-fA-F]+)\.NQF$")
 
     def _decrypt(self, data: bytes) -> bytes:
+        logging.debug("Decrypting the malware file, data length: %s", len(data))
         return bytes([((b - 84) % 256) ^ 0xA5 for b in data])
 
     def _get_malfile(self, username: str, sha1: str) -> bytes:
+        logging.debug(
+            'Getting malware file for user "%s" and SHA1 hash "%s"', username, sha1
+        )
         quarfile = self.quarpath.format(username=username)
         quarfile = Path(quarfile) / (sha1.upper() + ".NQF")
         try:
+            logging.debug('Trying to open malware file, path "%s"', quarfile)
             with open(quarfile, "rb") as f:
                 data = f.read()
                 decrypted_data = self._decrypt(data)
-        except OSError:
-            # logging
-            print("Eset Error: could not read file", quarfile)
+        except OSError as e:
+            logging.error('Cannot open malware file on path "%s"', quarfile, exc_info=e)
 
         return decrypted_data
 
     def _get_metadata(self, path: Path, objhash: str) -> KaitaiParserMetadata | None:
+        logging.debug("Getting NDF metadata for path: %s", path)
         # metadata file has .NDF extension
         metadata_path = path / (objhash + ".NDF")
         if not metadata_path.is_file():
+            logging.debug("Metadata file not found", path)
             return None
 
-        kt = KaitaiParserMetadata.from_file(metadata_path)
+        try:
+            kt = KaitaiParserMetadata.from_file(metadata_path)
+        except OSError as e:
+            logging.error(
+                'Cannot open nor read NDF metadata for path "%s"', path, exc_info=e
+            )
+            return None
+        except KaitaiStructError as e:
+            logging.warning(
+                'Cannot read NDF metadata, mostly because of incorrect format for path "%s"',
+                path,
+                exc_info=e,
+            )
+            return None
+
         kt.close()
         return kt
 
     def parse_from_log(self, _=None) -> dict[tuple[str, datetime], QuarEntry]:
+        logging.info("Parsing from log in %s", self.name)
         quarfiles: dict[tuple[str, datetime], QuarEntry] = {}
 
-        for metadata in mainParsing(self.location):
+        for idx, metadata in enumerate(mainParsing(self.location)):
+            logging.debug("Parsing entry, idx %s", idx)
             if metadata["user"] == "SYSTEM":
+                logging.debug("Entry's (idx %s) user is SYSTEM, skipping", idx)
                 continue
             q = QuarEntry()
             q.timestamp = metadata["timestamp"]
@@ -225,25 +266,36 @@ class EsetParser(Parser):
     def parse_from_fs(
         self, data: dict[tuple[str, datetime], QuarEntry] | None = None
     ) -> dict[tuple[str, datetime], QuarEntry]:
+        logging.info("Parsing from filesystem in %s", self.name)
         quarfiles = {}
 
         actual_path = Path("Users/")
-        for entry in actual_path.glob(
-            "*/AppData/Local/ESET/ESET Security/Quarantine/*.NQF"
+        for idx, entry in enumerate(
+            actual_path.glob("*/AppData/Local/ESET/ESET Security/Quarantine/*.NQF")
         ):
+            logging.debug('Parsing entry, idx %s, path "%s"', idx, entry)
             res_path = re.match(self.regex_entry, entry.name)
             res_user = re.match(self.regex_user, str(entry))
 
             if not res_path:
+                logging.debug(
+                    "Entry's (idx %s) filename of incorrect format, skipping", idx
+                )
                 continue
 
             user = res_user.group(1)
             objhash = res_path.group(1)
 
             if (objhash.lower(), user) in data:
+                logging.debug("Entry (idx %s) already found, skipping", idx)
                 continue
 
-            entry_stat = entry.stat()
+            try:
+                logging.debug('Trying to stat entry file, path "%s"', entry)
+                entry_stat = entry.stat()
+            except OSError as e:
+                logging.error('Cannot stat entry file, path "%s"', entry, exc_info=e)
+                continue
 
             timestamp = DTC.get_dt_from_stat(entry_stat)
             path = str(entry)
