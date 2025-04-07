@@ -6,6 +6,7 @@ import argparse
 import csv
 import ctypes
 import io
+import logging
 import os
 import sys
 import tarfile
@@ -25,6 +26,7 @@ __version__ = "0.5.0"
 def main() -> None:
     init()
     args = parse_cli()
+    init_logging(args.log_level)
 
     # Admin privileges are required for optimal function (windows only)
     if sys.platform == "win32" and not ctypes.windll.shell32.IsUserAnAdmin():
@@ -175,6 +177,23 @@ def parse_cli() -> argparse.Namespace:
     )
 
     return parser.parse_args()
+
+
+def init_logging(log_level: str):
+    numeric_level = getattr(logging, log_level.upper(), None)
+    if not isinstance(numeric_level, int):
+        raise ValueError(f"Invalid log level: {log_level}")
+
+    logging.basicConfig(
+        handlers=[
+            # logging.FileHandler("syslog.log", mode="w", encoding="utf-8"),
+            logging.StreamHandler(sys.stderr)
+        ],
+        level=numeric_level,
+        format="%(asctime)s:%(levelname)s:%(name)s:%(module)s:%(message)s",
+    )
+    logging.debug("Logging started, logger initialized successfully")
+    logging.info("Logging as user %s", getpass.getuser())
 
 
 if __name__ == "__main__":
