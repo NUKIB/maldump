@@ -192,7 +192,7 @@ def parse_cli() -> argparse.Namespace:
 def init_logging(log_level: str):
     numeric_level = getattr(logging, log_level.upper(), None)
     if not isinstance(numeric_level, int):
-        raise ValueError(f"Invalid log level: {log_level}")
+        raise ValueError("Invalid log level: " + log_level)
 
     logging.basicConfig(
         handlers=[
