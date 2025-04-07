@@ -19,7 +19,6 @@ import binascii
 import logging
 import re
 import struct
-import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -60,6 +59,19 @@ _dataTypeHeaders = {
 _hashTypeHeaders = {"ObjectHash": OBJECTHASH_HEADER, "ProgHash": PROGHASH_HEADER}
 
 
+def log_fn(func):
+    def wrapper(*args, **kwargs):
+        logging.debug(
+            "Calling function: %s, arguments: %s, keyword arguments: %s",
+            func.__name__,
+            tuple(arg for arg in args if type(arg) not in {bytes, EsetParser}),
+            kwargs,
+        )
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 def _infoNotFound(field):
     logging.info("Parsing data in ESET led to field not found: %s", field)
 
@@ -68,14 +80,14 @@ def _warningUnexpected(field):
     logging.warning("Parsing data in ESET found unexpected bytes in field %s", field)
 
 
+@log_fn
 def _winToUnixTimestamp(winTimestamp):
-    logging.debug("Converting Windows to Unix time")
     magicNumber = 11644473600
     return (winTimestamp / 10000000) - magicNumber
 
 
+@log_fn
 def _extractDataType(dataType, rawRecord):
-    logging.debug("Extracting data, type: %s", dataType)
     # Format: dataType_HEADER + '??' + NULL + objectData + NULL
 
     dataType_HEADER = _dataTypeHeaders[dataType]
@@ -92,8 +104,8 @@ def _extractDataType(dataType, rawRecord):
     return dataWideChar.decode("utf-16")
 
 
+@log_fn
 def _extractHashType(hashType, rawRecord):
-    logging.debug("Extracting hash, type %s", hashType)
     # Format: hashType_HEADER + '??' + NULL + hashData[20]
 
     hashType_HEADER = _hashTypeHeaders[hashType]
@@ -109,8 +121,8 @@ def _extractHashType(hashType, rawRecord):
     return binascii.hexlify(hashHex).decode("utf-8")
 
 
+@log_fn
 def _extractFirstSeen(rawRecord):
-    logging.debug("Extracting first seen")
     # Format: FIRSTSEEN_HEADER + UnixTimestamp[4]
 
     offset = rawRecord.find(FIRSTSEEN_HEADER)
@@ -122,8 +134,8 @@ def _extractFirstSeen(rawRecord):
     return datetime.fromtimestamp(timestamp, timezone.utc).strftime(TIMEFORMAT)
 
 
+@log_fn
 def _extractTimestamp(rawRecord):
-    logging.debug("Extracting timestamp")
     # Format: RECORD_HEADER + ID[4] + MicrosoftTimestamp[8]
 
     littleEndianTimestamp = rawRecord[4:12]
@@ -132,16 +144,16 @@ def _extractTimestamp(rawRecord):
     return datetime.fromtimestamp(int(timestamp))
 
 
+@log_fn
 def _checkID(recordId, rawRecord):
-    logging.debug("Checking record ID")
     littleEndianIds = [rawRecord[0:4], rawRecord[16:20]]
     for littleEndianId in littleEndianIds:
         if struct.unpack("<L", littleEndianId)[0] != recordId:
             _warningUnexpected("ID")
 
 
+@log_fn
 def getRawRecords(rawData):
-    logging.debug("Getting raw records from data")
     rawRecords = rawData.split(RECORD_HEADER)[1:]
     if not rawRecords:
         logging.info("No records found in raw data")
@@ -153,10 +165,10 @@ def getRawRecords(rawData):
         _checkID(recordId, rawRecord)
         # create 2D array instead of zip-object in Python 3
         records.append((recordId, rawRecord))
-    logging.debug("Raw records extracted")
     return records
 
 
+@log_fn
 def parseRecord(rawRecord):
     return {
         "timestamp": _extractTimestamp(rawRecord),
@@ -171,13 +183,13 @@ def parseRecord(rawRecord):
     }
 
 
+@log_fn
 def mainParsing(virlog_path):
     try:
-        logging.debug('Trying to open virlog file, path "%s"', virlog_path)
         with open(virlog_path, "rb") as f:
             virlog_data = f.read()
     except OSError as e:
-        logging.error(
+        logging.exception(
             'Cannot open virlog file in ESET on path "%s"', virlog_path, exc_info=e
         )
         return []
@@ -199,14 +211,12 @@ class EsetParser(Parser):
         )
         self.regex_entry = re.compile(r"([0-9a-fA-F]+)\.NQF$")
 
+    @log_fn
     def _decrypt(self, data: bytes) -> bytes:
-        logging.debug("Decrypting the malware file, data length: %s", len(data))
         return bytes([((b - 84) % 256) ^ 0xA5 for b in data])
 
+    @log_fn
     def _get_malfile(self, username: str, sha1: str) -> bytes:
-        logging.debug(
-            'Getting malware file for user "%s" and SHA1 hash "%s"', username, sha1
-        )
         quarfile = self.quarpath.format(username=username)
         quarfile = Path(quarfile) / (sha1.upper() + ".NQF")
         try:
@@ -215,28 +225,30 @@ class EsetParser(Parser):
                 data = f.read()
                 decrypted_data = self._decrypt(data)
         except OSError as e:
-            logging.error('Cannot open malware file on path "%s"', quarfile, exc_info=e)
+            logging.exception(
+                'Cannot open malware file on path "%s"', quarfile, exc_info=e
+            )
 
         return decrypted_data
 
+    @log_fn
     def _get_metadata(self, path: Path, objhash: str) -> KaitaiParserMetadata | None:
-        logging.debug("Getting NDF metadata for path: %s", path)
         # metadata file has .NDF extension
         metadata_path = path / (objhash + ".NDF")
         if not metadata_path.is_file():
-            logging.debug("Metadata file not found", path)
+            logging.debug("Metadata file not found")
             return None
 
         try:
             kt = KaitaiParserMetadata.from_file(metadata_path)
         except OSError as e:
-            logging.error(
+            logging.exception(
                 'Cannot open nor read NDF metadata for path "%s"', path, exc_info=e
             )
             return None
         except KaitaiStructError as e:
             logging.warning(
-                'Cannot read NDF metadata, mostly because of incorrect format for path "%s"',
+                'Cannot read NDF metadata, probably incorrect format for path "%s"',
                 path,
                 exc_info=e,
             )
@@ -294,7 +306,9 @@ class EsetParser(Parser):
                 logging.debug('Trying to stat entry file, path "%s"', entry)
                 entry_stat = entry.stat()
             except OSError as e:
-                logging.error('Cannot stat entry file, path "%s"', entry, exc_info=e)
+                logging.exception(
+                    'Cannot stat entry file, path "%s"', entry, exc_info=e
+                )
                 continue
 
             timestamp = DTC.get_dt_from_stat(entry_stat)
