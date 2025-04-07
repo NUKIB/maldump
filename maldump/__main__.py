@@ -157,6 +157,13 @@ def parse_cli() -> argparse.Namespace:
         "-a", "--all", action="store_true", help="equivalent of running both -q and -m"
     )
     parser.add_argument(
+        "-t",
+        "--log-level",
+        choices=["critical", "fatal", "error", "warn", "warning", "info", "debug"],
+        default="warning",
+        help="log level",
+    )
+    parser.add_argument(
         "-v", "--version", action="version", version="%(prog)s " + __version__
     )
     parser.add_argument(
