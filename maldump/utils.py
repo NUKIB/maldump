@@ -3,6 +3,7 @@ Convenience utils for use in avs and parsers
 """
 
 import contextlib
+import logging
 from datetime import datetime, timezone
 
 from arc4 import ARC4
@@ -29,7 +30,7 @@ class CustomArc4:
 
 class RawTimeConverter:
     def __init__(self, time_type: str):
-        self.time_type = time_type
+        self.time_type = OperatingSystem(time_type)
 
     def _decode_windows(self, wintime_bytes: bytes) -> datetime:
         wintime = int.from_bytes(wintime_bytes, byteorder="little")
@@ -55,8 +56,11 @@ class DatetimeConverter:
     @staticmethod
     # type: ignore
     def get_dt_from_stat(stat) -> datetime:
+        logging.debug("Getting datetime from stat")
         ctime = stat.st_ctime_ns
         with contextlib.suppress(AttributeError):
+            logging.debug("Trying to extract birthtime")
             ctime = stat.st_birthtime_ns
+            logging.debug("Birthtime extracted successfully")
 
         return datetime.fromtimestamp(ctime // 1000000000)
