@@ -78,9 +78,9 @@ types:
 
   widestr:
     seq:
-      - id: str_len
+      - id: len_str
         type: u4
-      - id: str_cont
+      - id: str
         type: str
         encoding: UTF-16LE
-        size: 2 * str_len
+        size: 2 * len_str
