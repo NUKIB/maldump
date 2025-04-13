@@ -15,19 +15,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 
-import binascii
 import logging
 import re
-import struct
-from datetime import datetime, timezone
+import typing
 from pathlib import Path
 
 from maldump.constants import ThreatMetadata
 from maldump.parsers.kaitai.eset_ndf_parser import EsetNdfParser as KaitaiParserMetadata
+from maldump.parsers.kaitai.eset_virlog_parser import EsetVirlogParser
 from maldump.structures import Parser, QuarEntry
 from maldump.utils import DatetimeConverter as DTC
 from maldump.utils import Parser as parse
 from maldump.utils import Reader as read
+
+if typing.TYPE_CHECKING:
+    from datetime import datetime
 
 __author__ = "Ladislav Baco"
 __copyright__ = "Copyright (C) 2017"
@@ -36,27 +38,6 @@ __license__ = "GPLv3"
 __version__ = "0.2.1"
 __maintainer__ = "Ladislav Baco"
 __status__ = "Development"
-
-TIMEFORMAT = "%Y-%m-%d %H:%M:%S"
-NULL = b"\x00\x00"
-RECORD_HEADER = b"\x24\x00\x00\x00\x01\x00\x01\x00"
-OBJECT_HEADER = b"\xbe\x0b\x4e\x00"
-INFILTRATION_HEADER = b"\x4d\x1d\x4e\x00"
-USER_HEADER = b"\xee\x03\x4e\x00"
-VIRUSDB_HEADER = b"\x17\x27\x4e\x00"
-PROGNAME_HEADER = b"\xc4\x0b\x4e\x00"
-PROGHASH_HEADER = b"\x9d\x13\x42\x00"
-OBJECTHASH_HEADER = b"\x9e\x13\x42\x00"
-FIRSTSEEN_HEADER = b"\x9f\x13\x46\x00"
-
-_dataTypeHeaders = {
-    "Object": OBJECT_HEADER,
-    "Infiltration": INFILTRATION_HEADER,
-    "User": USER_HEADER,
-    "VirusDB": VIRUSDB_HEADER,
-    "ProgName": PROGNAME_HEADER,
-}
-_hashTypeHeaders = {"ObjectHash": OBJECTHASH_HEADER, "ProgHash": PROGHASH_HEADER}
 
 
 def log_fn(func):
@@ -79,128 +60,47 @@ def log_fn(func):
     return wrapper
 
 
-def _infoNotFound(field):
-    logging.info("Parsing data in ESET led to field not found: %s", field)
-
-
-def _warningUnexpected(field):
-    logging.warning("Parsing data in ESET found unexpected bytes in field %s", field)
-
-
-@log_fn
-def _winToUnixTimestamp(winTimestamp):
-    magicNumber = 11644473600
-    return (winTimestamp / 10000000) - magicNumber
-
-
-@log_fn
-def _extractDataType(dataType, rawRecord):
-    # Format: dataType_HEADER + '??' + NULL + objectData + NULL
-
-    dataType_HEADER = _dataTypeHeaders[dataType]
-    dataOffset = rawRecord.find(dataType_HEADER)
-    if dataOffset < 0:
-        _infoNotFound(dataType)
-        return ""
-    if rawRecord[dataOffset + 6 : dataOffset + 8] != NULL:
-        _warningUnexpected(dataType)
-    # find NULL char, but search for (\x00)*3, because third zero byte is part of
-    # last widechar
-    dataEnd = dataOffset + 8 + 1 + rawRecord[dataOffset + 8 :].find(b"\x00" + NULL)
-    dataWideChar = rawRecord[dataOffset + 8 : dataEnd]
-    return dataWideChar.decode("utf-16")
-
-
-@log_fn
-def _extractHashType(hashType, rawRecord):
-    # Format: hashType_HEADER + '??' + NULL + hashData[20]
-
-    hashType_HEADER = _hashTypeHeaders[hashType]
-    hashOffset = rawRecord.find(hashType_HEADER)
-    if hashOffset < 0:
-        _infoNotFound(hashType)
-        return ""
-    if rawRecord[hashOffset + 6 : hashOffset + 8] != NULL:
-        _warningUnexpected(hashType)
-    hashEnd = hashOffset + 8 + 20
-    hashHex = rawRecord[hashOffset + 8 : hashEnd]
-    # return hashHex.encode('hex')
-    return binascii.hexlify(hashHex).decode("utf-8")
-
-
-@log_fn
-def _extractFirstSeen(rawRecord):
-    # Format: FIRSTSEEN_HEADER + UnixTimestamp[4]
-
-    offset = rawRecord.find(FIRSTSEEN_HEADER)
-    if offset < 0:
-        _infoNotFound("FirstSeen")
-        return ""
-    littleEndianTimestamp = rawRecord[offset + 4 : offset + 8]
-    timestamp = struct.unpack("<L", littleEndianTimestamp)[0]
-    return datetime.fromtimestamp(timestamp, timezone.utc).strftime(TIMEFORMAT)
-
-
-@log_fn
-def _extractTimestamp(rawRecord):
-    # Format: RECORD_HEADER + ID[4] + MicrosoftTimestamp[8]
-
-    littleEndianTimestamp = rawRecord[4:12]
-    winTimestamp = struct.unpack("<Q", littleEndianTimestamp)[0]
-    timestamp = _winToUnixTimestamp(winTimestamp)
-    return datetime.fromtimestamp(int(timestamp))
-
-
-@log_fn
-def _checkID(recordId, rawRecord):
-    littleEndianIds = [rawRecord[0:4], rawRecord[16:20]]
-    for littleEndianId in littleEndianIds:
-        if struct.unpack("<L", littleEndianId)[0] != recordId:
-            _warningUnexpected("ID")
-
-
-@log_fn
-def getRawRecords(rawData):
-    rawRecords = rawData.split(RECORD_HEADER)[1:]
-    if not rawRecords:
-        logging.info("No records found in raw data")
-        return []
-
-    ziprecords = zip(range(len(rawRecords)), rawRecords)
-    records = []
-    for recordId, rawRecord in ziprecords:
-        _checkID(recordId, rawRecord)
-        # create 2D array instead of zip-object in Python 3
-        records.append((recordId, rawRecord))
-    return records
-
-
-@log_fn
-def parseRecord(rawRecord):
+def parseRecord(record: dict):
     return {
-        "timestamp": _extractTimestamp(rawRecord),
-        "virusdb": _extractDataType("VirusDB", rawRecord),
-        "obj": _extractDataType("Object", rawRecord),
-        "objhash": _extractHashType("ObjectHash", rawRecord),
-        "infiltration": _extractDataType("Infiltration", rawRecord),
-        "user": _extractDataType("User", rawRecord).split("\\")[1],
-        "progname": _extractDataType("ProgName", rawRecord),
-        "proghash": _extractHashType("ProgHash", rawRecord),
-        "firstseen": _extractFirstSeen(rawRecord),
+        "timestamp": record.get("timestamp"),
+        "virusdb": record.get("virus_db").str,
+        "obj": record.get("object_name").str,
+        "objhash": record.get("object_hash").hash.hex(),
+        "infiltration": record.get("infiltration_name").str,
+        "user": record.get("user_name").str.split("\\")[1],
+        "progname": record.get("program_name").str,
+        "proghash": record.get("program_hash").hash.hex(),
+        "firstseen": record.get("firstseen"),
     }
+
+
+def convertToDict(parser: EsetVirlogParser):
+    return [
+        {
+            **{
+                y.name.name: y.arg if hasattr(y, "arg") else None
+                for y in x.record.data_fields
+            },
+            "timestamp": x.record.win_timestamp.date_time,
+        }
+        for x in parser.threats
+    ]
 
 
 @log_fn
 def mainParsing(virlog_path):
-    virlog_data = read.contents(virlog_path, filetype="virlog")
-    if virlog_data is None:
+    kt = parse(EsetParser).kaitai(EsetVirlogParser, virlog_path)
+    if kt is None:
+        logging.warning("Skipping virlog.dat parsing")
         return []
+    kt.close()
 
-    rawRecords = getRawRecords(virlog_data)
+    threats = convertToDict(kt)
+
     parsedRecords = []
-    for idx, rawRecord in rawRecords:
-        logging.debug("Parsing raw record %s/%s", idx + 1, len(rawRecords))
-        parsedRecords.append(parseRecord(rawRecord))
+    for idx, record in enumerate(threats):
+        logging.debug("Parsing raw record %s/%s", idx + 1, len(threats))
+        parsedRecords.append(parseRecord(record))
 
     return parsedRecords
 
@@ -302,10 +202,10 @@ class EsetParser(Parser):
             kt = self._get_metadata(entry.parent, objhash)
             if kt is not None:
                 timestamp = kt.datetime_unix.date_time
-                path = kt.findings[0].mal_path.str_cont
+                path = kt.findings[0].mal_path.str
                 sha1 = hex(int.from_bytes(kt.mal_hash_sha1, "big")).lstrip("0x")
                 size = kt.mal_size
-                threat = kt.findings[0].threat_canonized.str_cont
+                threat = kt.findings[0].threat_canonized.str
 
             q = QuarEntry()
             q.timestamp = timestamp
