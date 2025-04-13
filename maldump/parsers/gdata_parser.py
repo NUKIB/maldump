@@ -12,6 +12,7 @@ class GdataParser(Parser):
         pass
 
     def parse_from_fs(self, _=None) -> dict[str, QuarEntry]:
+        logging.info("Parsing from filesystem in %s", self.name)
         quarfiles = {}
 
         for idx, metafile in enumerate(self.location.glob("*.q")):

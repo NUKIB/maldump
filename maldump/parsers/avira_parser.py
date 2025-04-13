@@ -8,8 +8,11 @@ from maldump.utils import Parser as parse
 
 
 class AviraParser(Parser):
-    def parse_from_log(self, _=None) -> dict[str, QuarEntry]:
-        logging.info("Parsing from log in %s", self.name)
+    def parse_from_log(self, data=None):
+        pass
+
+    def parse_from_fs(self, _=None) -> dict[str, QuarEntry]:
+        logging.info("Parsing from filesystem in %s", self.name)
         quarfiles = {}
         for idx, metafile in enumerate(self.location.glob("*.qua")):
             logging.debug('Parsing entry, idx %s, path "%s"', idx, metafile)
@@ -29,6 +32,3 @@ class AviraParser(Parser):
             kt.close()
 
         return quarfiles
-
-    def parse_from_fs(self, data=None):
-        pass
