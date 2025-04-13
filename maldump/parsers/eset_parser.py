@@ -31,6 +31,9 @@ from maldump.utils import Reader as read
 if typing.TYPE_CHECKING:
     from datetime import datetime
 
+if typing.TYPE_CHECKING:
+    from datetime import datetime
+
 __author__ = "Ladislav Baco"
 __copyright__ = "Copyright (C) 2017"
 __credits__ = "Ladislav Baco"
@@ -59,7 +62,7 @@ def log_fn(func):
 
     return wrapper
 
-
+  
 def parseRecord(record: dict):
     return {
         "timestamp": record.get("timestamp"),
@@ -95,6 +98,7 @@ def mainParsing(virlog_path):
         return []
     kt.close()
 
+
     threats = convertToDict(kt)
 
     parsedRecords = []
@@ -102,7 +106,7 @@ def mainParsing(virlog_path):
         logging.debug("Parsing raw record %s/%s", idx + 1, len(threats))
         parsedRecords.append(parseRecord(record))
 
-    return parsedRecords
+    return [parseRecord(record) for record in threats]
 
 
 class EsetParser(Parser):
