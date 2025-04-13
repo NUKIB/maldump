@@ -62,7 +62,8 @@ def log_fn(func):
 
     return wrapper
 
-  
+
+@log_fn
 def parseRecord(record: dict):
     return {
         "timestamp": record.get("timestamp"),
@@ -77,6 +78,7 @@ def parseRecord(record: dict):
     }
 
 
+@log_fn
 def convertToDict(parser: EsetVirlogParser):
     return [
         {
@@ -97,7 +99,6 @@ def mainParsing(virlog_path):
         logging.warning("Skipping virlog.dat parsing")
         return []
     kt.close()
-
 
     threats = convertToDict(kt)
 
