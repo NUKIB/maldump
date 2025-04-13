@@ -52,9 +52,8 @@ class KasperskyParser(Parser):
         data = read.contents(file, filetype="malware")
         if data is None:
             return b""
-        data = xor(data, key)
 
-        return data
+        return xor(data, key)
 
     def parse_from_log(self, _=None) -> dict[str, QuarEntry]:
         logging.info("Parsing from log in %s", self.name)

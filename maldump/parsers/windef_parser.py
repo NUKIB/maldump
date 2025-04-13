@@ -1,9 +1,6 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime as dt
-
-from kaitaistruct import KaitaiStructError
 
 from maldump.constants import ThreatMetadata
 from maldump.parsers.kaitai.windef_entries import WindefEntries as KaitaiParserEntries

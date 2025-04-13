@@ -2,16 +2,20 @@
 Convenience utils for use in avs and parsers
 """
 
+from __future__ import annotations
+
 import contextlib
 import logging
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Type, Generic, TypeVar, Any
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 import kaitaistruct
 from arc4 import ARC4
 
 from maldump.constants import OperatingSystem
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 T = TypeVar("T")
 
@@ -75,16 +79,16 @@ class Parser(Generic[T]):
     def __init__(self, obj: object) -> None:
         self.objname = obj.__class__.__name__
 
-    def kaitai(self, kaitai: Type[T], path: Path) -> T | None:
+    def kaitai(self, kaitai: type[T], path: Path) -> T | None:
         kt = None
         try:
             logging.debug(
-                'Trying to parse file on path "%s" to kaitai struct of type "%s" on <%s>',
+                'Trying to parse file, path "%s" to kaitai, type "%s" on <%s>',
                 path,
                 kaitai.__name__,
                 self.objname,
             )
-            kt = kaitai.from_file(path)
+            kt = kaitai.from_file(path)  # type: ignore
         except OSError as e:
             logging.exception(
                 'Cannot open nor read kaitai for path "%s"',
@@ -115,7 +119,7 @@ class Parser(Generic[T]):
 
         return timestamp
 
-    def entry_stat(self, entry: Any):
+    def entry_stat(self, entry: Any):  # type: ignore
         try:
             logging.debug(
                 'Trying to stat entry file, path "%s" on <%s>', entry, self.objname
@@ -130,7 +134,7 @@ class Parser(Generic[T]):
 
 class Reader:
     @staticmethod
-    def contents(path: Path, filetype: str = ""):
+    def contents(path: Path, filetype: str = "") -> bytes | None:
         if filetype:
             filetype += " "
 

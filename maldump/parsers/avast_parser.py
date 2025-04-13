@@ -5,7 +5,7 @@ import sqlite3
 import tempfile
 from datetime import datetime as dt
 from os import unlink
-from xml.etree.ElementTree import ParseError, Element
+from xml.etree.ElementTree import Element, ParseError
 
 import defusedxml.ElementTree as ET
 
@@ -38,7 +38,6 @@ def log_fn(func):
 
 
 class AvastParser(Parser):
-
     def __init__(self):
         self.db = None
         self.tmpfile = None
