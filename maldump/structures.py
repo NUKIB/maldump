@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+from datetime import datetime as dt
 import hashlib
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt
     from pathlib import Path
 
 T = TypeVar("T")
