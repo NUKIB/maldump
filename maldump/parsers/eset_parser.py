@@ -64,7 +64,14 @@ def log_fn(func):
         logging.debug(
             "Calling function: %s, arguments: %s, keyword arguments: %s",
             func.__name__,
-            tuple(arg for arg in args if type(arg) not in {bytes, EsetParser}),
+            tuple(
+                (
+                    arg
+                    if type(arg) not in {bytes, EsetParser}
+                    else "<" + type(arg).__name__ + ">"
+                )
+                for arg in args
+            ),
             kwargs,
         )
         return func(*args, **kwargs)
