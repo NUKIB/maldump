@@ -22,12 +22,12 @@ import struct
 from datetime import datetime, timezone
 from pathlib import Path
 
-from kaitaistruct import KaitaiStructError
-
 from maldump.constants import ThreatMetadata
 from maldump.parsers.kaitai.eset_ndf_parser import EsetNdfParser as KaitaiParserMetadata
 from maldump.structures import Parser, QuarEntry
 from maldump.utils import DatetimeConverter as DTC
+from maldump.utils import Parser as parse
+from maldump.utils import Reader as read
 
 __author__ = "Ladislav Baco"
 __copyright__ = "Copyright (C) 2017"
@@ -185,14 +185,10 @@ def parseRecord(rawRecord):
 
 @log_fn
 def mainParsing(virlog_path):
-    try:
-        with open(virlog_path, "rb") as f:
-            virlog_data = f.read()
-    except OSError as e:
-        logging.exception(
-            'Cannot open virlog file in ESET on path "%s"', virlog_path, exc_info=e
-        )
+    virlog_data = read.contents(virlog_path, filetype="virlog")
+    if virlog_data is None:
         return []
+
     rawRecords = getRawRecords(virlog_data)
     parsedRecords = []
     for idx, rawRecord in rawRecords:
@@ -219,17 +215,12 @@ class EsetParser(Parser):
     def _get_malfile(self, username: str, sha1: str) -> bytes:
         quarfile = self.quarpath.format(username=username)
         quarfile = Path(quarfile) / (sha1.upper() + ".NQF")
-        try:
-            logging.debug('Trying to open malware file, path "%s"', quarfile)
-            with open(quarfile, "rb") as f:
-                data = f.read()
-                decrypted_data = self._decrypt(data)
-        except OSError as e:
-            logging.exception(
-                'Cannot open malware file on path "%s"', quarfile, exc_info=e
-            )
 
-        return decrypted_data
+        data = read.contents(quarfile, filetype="malware")
+        if data is None:
+            return b""
+
+        return self._decrypt(data)
 
     @log_fn
     def _get_metadata(self, path: Path, objhash: str) -> KaitaiParserMetadata | None:
@@ -239,19 +230,8 @@ class EsetParser(Parser):
             logging.debug("Metadata file not found")
             return None
 
-        try:
-            kt = KaitaiParserMetadata.from_file(metadata_path)
-        except OSError as e:
-            logging.exception(
-                'Cannot open nor read NDF metadata for path "%s"', path, exc_info=e
-            )
-            return None
-        except KaitaiStructError as e:
-            logging.warning(
-                'Cannot read NDF metadata, probably incorrect format for path "%s"',
-                path,
-                exc_info=e,
-            )
+        kt = parse(self).kaitai(KaitaiParserMetadata, metadata_path)
+        if kt is None:
             return None
 
         kt.close()
