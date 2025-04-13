@@ -6,7 +6,7 @@ import contextlib
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Type, Generic, TypeVar
+from typing import Type, Generic, TypeVar, Any
 
 import kaitaistruct
 from arc4 import ARC4
@@ -114,6 +114,18 @@ class Parser(Generic[T]):
             timestamp = datetime.now()
 
         return timestamp
+
+    def entry_stat(self, entry: Any):
+        try:
+            logging.debug(
+                'Trying to stat entry file, path "%s" on <%s>', entry, self.objname
+            )
+            entry_stat = entry.stat()
+        except OSError as e:
+            logging.exception('Cannot stat entry file, path "%s"', entry, exc_info=e)
+            entry_stat = None
+
+        return entry_stat
 
 
 class Reader:
