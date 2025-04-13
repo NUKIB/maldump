@@ -289,15 +289,10 @@ class EsetParser(Parser):
                 logging.debug("Entry (idx %s) already found, skipping", idx)
                 continue
 
-            try:
-                logging.debug('Trying to stat entry file, path "%s"', entry)
-                entry_stat = entry.stat()
-            except OSError as e:
-                logging.exception(
-                    'Cannot stat entry file, path "%s"', entry, exc_info=e
-                )
+            entry_stat = parse(self).entry_stat(entry)
+            if entry_stat is None:
+                logging.debug('Skipping entry idx %s, path "%s"', idx, entry)
                 continue
-
             timestamp = DTC.get_dt_from_stat(entry_stat)
             path = str(entry)
             sha1 = None
