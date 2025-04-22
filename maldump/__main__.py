@@ -37,8 +37,12 @@ def main() -> None:
     # Switch to root partition
     os.chdir(args.root_dir)
 
-    # Get a list of all installed avs
-    avs = AVManager.detect()
+    if args.all_avs:
+        # Get a list of all supported avs
+        avs = AVManager.retrieve()
+    else:
+        # Get a list of all installed avs
+        avs = AVManager.detect()
 
     if args.quar:
         export_files(avs, dest)
@@ -155,6 +159,12 @@ def parse_cli() -> argparse.Namespace:
     )
     parser.add_argument(
         "-a", "--all", action="store_true", help="equivalent of running both -q and -m"
+    )
+    parser.add_argument(
+        "-r",
+        "--all-avs",
+        action="store_true",
+        help="skip detection of existing avs and try every supported one",
     )
     parser.add_argument(
         "-v", "--version", action="version", version="%(prog)s " + __version__
