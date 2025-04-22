@@ -7,7 +7,7 @@ from __future__ import annotations
 import contextlib
 import logging
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, Generic, TypeVar, Callable
+from typing import TYPE_CHECKING, Any, Callable, Generic, TypeVar
 from xml.etree.ElementTree import Element
 
 import kaitaistruct
@@ -33,8 +33,8 @@ def xor(plaintext: bytes, key: bytes) -> bytes:
 
 class Logger:
     @staticmethod
-    def log(_func: Callable = None, *, lgr: logging.Logger = logger):
-        def log_fn(func: Callable) -> Any:
+    def log(_func: Callable | None = None, *, lgr: logging.Logger = logger):
+        def log_fn(func: Callable | None) -> Any:
             def wrapper(*args: tuple, **kwargs: dict) -> Any:
                 lgr.debug(
                     "Calling function: %s, arguments: %s, keyword arguments: %s",
