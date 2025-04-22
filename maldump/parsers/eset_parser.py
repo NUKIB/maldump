@@ -25,14 +25,14 @@ from maldump.parsers.kaitai.eset_ndf_parser import EsetNdfParser as KaitaiParser
 from maldump.parsers.kaitai.eset_virlog_parser import EsetVirlogParser
 from maldump.structures import Parser, QuarEntry
 from maldump.utils import DatetimeConverter as DTC
+from maldump.utils import Logger as log
 from maldump.utils import Parser as parse
 from maldump.utils import Reader as read
 
 if typing.TYPE_CHECKING:
     from datetime import datetime
 
-if typing.TYPE_CHECKING:
-    from datetime import datetime
+logger = logging.getLogger(__name__)
 
 __author__ = "Ladislav Baco"
 __copyright__ = "Copyright (C) 2017"
@@ -43,27 +43,7 @@ __maintainer__ = "Ladislav Baco"
 __status__ = "Development"
 
 
-def log_fn(func):
-    def wrapper(*args, **kwargs):
-        logging.debug(
-            "Calling function: %s, arguments: %s, keyword arguments: %s",
-            func.__name__,
-            tuple(
-                (
-                    arg
-                    if type(arg) not in {bytes, EsetParser}
-                    else "<" + type(arg).__name__ + ">"
-                )
-                for arg in args
-            ),
-            kwargs,
-        )
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-@log_fn
+@log.log(lgr=logger)
 def parseRecord(record: dict):
     return {
         "timestamp": record.get("timestamp"),
@@ -78,7 +58,7 @@ def parseRecord(record: dict):
     }
 
 
-@log_fn
+@log.log(lgr=logger)
 def convertToDict(parser: EsetVirlogParser):
     return [
         {
@@ -92,11 +72,11 @@ def convertToDict(parser: EsetVirlogParser):
     ]
 
 
-@log_fn
+@log.log(lgr=logger)
 def mainParsing(virlog_path):
     kt = parse(EsetParser).kaitai(EsetVirlogParser, virlog_path)
     if kt is None:
-        logging.warning("Skipping virlog.dat parsing")
+        logger.warning("Skipping virlog.dat parsing")
         return []
     kt.close()
 
@@ -104,7 +84,7 @@ def mainParsing(virlog_path):
 
     parsedRecords = []
     for idx, record in enumerate(threats):
-        logging.debug("Parsing raw record %s/%s", idx + 1, len(threats))
+        logger.debug("Parsing raw record %s/%s", idx + 1, len(threats))
         parsedRecords.append(parseRecord(record))
 
     return [parseRecord(record) for record in threats]
@@ -119,11 +99,11 @@ class EsetParser(Parser):
         )
         self.regex_entry = re.compile(r"([0-9a-fA-F]+)\.NQF$")
 
-    @log_fn
+    @log.log(lgr=logger)
     def _decrypt(self, data: bytes) -> bytes:
         return bytes([((b - 84) % 256) ^ 0xA5 for b in data])
 
-    @log_fn
+    @log.log(lgr=logger)
     def _get_malfile(self, username: str, sha1: str) -> bytes:
         quarfile = self.quarpath.format(username=username)
         quarfile = Path(quarfile) / (sha1.upper() + ".NQF")
@@ -134,12 +114,12 @@ class EsetParser(Parser):
 
         return self._decrypt(data)
 
-    @log_fn
+    @log.log(lgr=logger)
     def _get_metadata(self, path: Path, objhash: str) -> KaitaiParserMetadata | None:
         # metadata file has .NDF extension
         metadata_path = path / (objhash + ".NDF")
         if not metadata_path.is_file():
-            logging.debug("Metadata file not found")
+            logger.debug("Metadata file not found")
             return None
 
         kt = parse(self).kaitai(KaitaiParserMetadata, metadata_path)
@@ -150,13 +130,13 @@ class EsetParser(Parser):
         return kt
 
     def parse_from_log(self, _=None) -> dict[tuple[str, datetime], QuarEntry]:
-        logging.info("Parsing from log in %s", self.name)
+        logger.info("Parsing from log in %s", self.name)
         quarfiles: dict[tuple[str, datetime], QuarEntry] = {}
 
         for idx, metadata in enumerate(mainParsing(self.location)):
-            logging.debug("Parsing entry, idx %s", idx)
+            logger.debug("Parsing entry, idx %s", idx)
             if metadata["user"] == "SYSTEM":
-                logging.debug("Entry's (idx %s) user is SYSTEM, skipping", idx)
+                logger.debug("Entry's (idx %s) user is SYSTEM, skipping", idx)
                 continue
             q = QuarEntry()
             q.timestamp = metadata["timestamp"]
@@ -170,19 +150,19 @@ class EsetParser(Parser):
     def parse_from_fs(
         self, data: dict[tuple[str, datetime], QuarEntry] | None = None
     ) -> dict[tuple[str, datetime], QuarEntry]:
-        logging.info("Parsing from filesystem in %s", self.name)
+        logger.info("Parsing from filesystem in %s", self.name)
         quarfiles = {}
 
         actual_path = Path("Users/")
         for idx, entry in enumerate(
             actual_path.glob("*/AppData/Local/ESET/ESET Security/Quarantine/*.NQF")
         ):
-            logging.debug('Parsing entry, idx %s, path "%s"', idx, entry)
+            logger.debug('Parsing entry, idx %s, path "%s"', idx, entry)
             res_path = re.match(self.regex_entry, entry.name)
             res_user = re.match(self.regex_user, str(entry))
 
             if not res_path:
-                logging.debug(
+                logger.debug(
                     "Entry's (idx %s) filename of incorrect format, skipping", idx
                 )
                 continue
@@ -191,12 +171,12 @@ class EsetParser(Parser):
             objhash = res_path.group(1)
 
             if (objhash.lower(), user) in data:
-                logging.debug("Entry (idx %s) already found, skipping", idx)
+                logger.debug("Entry (idx %s) already found, skipping", idx)
                 continue
 
             entry_stat = parse(self).entry_stat(entry)
             if entry_stat is None:
-                logging.debug('Skipping entry idx %s, path "%s"', idx, entry)
+                logger.debug('Skipping entry idx %s, path "%s"', idx, entry)
                 continue
             timestamp = DTC.get_dt_from_stat(entry_stat)
             path = str(entry)
