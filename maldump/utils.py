@@ -7,17 +7,20 @@ from __future__ import annotations
 import contextlib
 import logging
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, Callable
+from xml.etree.ElementTree import Element
 
 import kaitaistruct
 from arc4 import ARC4
 
+import maldump.parsers
 from maldump.constants import OperatingSystem
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 T = TypeVar("T")
+logger = logging.getLogger(__name__)
 
 
 def xor(plaintext: bytes, key: bytes) -> bytes:
@@ -26,6 +29,47 @@ def xor(plaintext: bytes, key: bytes) -> bytes:
     for i in range(len(plaintext)):
         result[i] ^= key[i % key_len]
     return bytes(result)
+
+
+class Logger:
+    @staticmethod
+    def log(_func: Callable = None, *, lgr: logging.Logger = logger):
+        def log_fn(func: Callable) -> Any:
+            def wrapper(*args: tuple, **kwargs: dict) -> Any:
+                lgr.debug(
+                    "Calling function: %s, arguments: %s, keyword arguments: %s",
+                    func.__name__,
+                    tuple(
+                        (
+                            arg
+                            if type(arg)
+                            not in {
+                                bytes,
+                                maldump.parsers.eset_parser.EsetParser,
+                                maldump.parsers.avast_parser.AvastParser,
+                                maldump.parsers.avg_parser.AVGParser,
+                                maldump.parsers.forticlient_parser.ForticlientParser,
+                                maldump.parsers.kaspersky_parser.KasperskyParser,
+                                maldump.parsers.malwarebytes_parser.MalwarebytesParser,
+                                maldump.parsers.mcafee_parser.McafeeParser,
+                                maldump.parsers.windef_parser.WindowsDefenderParser,
+                                maldump.parsers.kaitai.forticlient_parser.ForticlientParser.Timestamp,
+                                Element,
+                            }
+                            else "<" + type(arg).__name__ + ">"
+                        )
+                        for arg in args
+                    ),
+                    kwargs,
+                )
+                return func(*args, **kwargs)
+
+            return wrapper
+
+        if _func is None:
+            return log_fn
+
+        return log_fn(_func)
 
 
 class CustomArc4:
@@ -65,12 +109,12 @@ class DatetimeConverter:
     @staticmethod
     # type: ignore
     def get_dt_from_stat(stat) -> datetime:
-        logging.debug("Getting datetime from stat")
+        logger.debug("Getting datetime from stat")
         ctime = stat.st_ctime_ns
         with contextlib.suppress(AttributeError):
-            logging.debug("Trying to extract birthtime")
+            logger.debug("Trying to extract birthtime")
             ctime = stat.st_birthtime_ns
-            logging.debug("Birthtime extracted successfully")
+            logger.debug("Birthtime extracted successfully")
 
         return datetime.fromtimestamp(ctime // 1000000000)
 
@@ -82,7 +126,7 @@ class Parser(Generic[T]):
     def kaitai(self, kaitai: type[T], path: Path) -> T | None:
         kt = None
         try:
-            logging.debug(
+            logger.debug(
                 'Trying to parse file, path "%s" to kaitai, type "%s" on <%s>',
                 path,
                 kaitai.__name__,
@@ -90,13 +134,13 @@ class Parser(Generic[T]):
             )
             kt = kaitai.from_file(path)  # type: ignore
         except OSError as e:
-            logging.exception(
+            logger.exception(
                 'Cannot open nor read kaitai for path "%s"',
                 path,
                 exc_info=e,
             )
         except kaitaistruct.KaitaiStructError as e:
-            logging.warning(
+            logger.warning(
                 'Cannot read kaitai, probably incorrect format for path "%s"',
                 path,
                 exc_info=e,
@@ -105,28 +149,28 @@ class Parser(Generic[T]):
 
     def timestamp(self, value: int) -> datetime:
         try:
-            logging.debug(
+            logger.debug(
                 "Trying to convert timestamp on <%s>",
                 self.objname,
             )
             timestamp = datetime.fromtimestamp(int(value))
         except (OSError, OverflowError, ValueError) as e:
-            logging.warning(
+            logger.warning(
                 "Cannot convert timestamp to datetime, using default",
                 exc_info=e,
             )
-            timestamp = datetime.now()
+            timestamp = datetime.fromtimestamp(0)
 
         return timestamp
 
     def entry_stat(self, entry: Any):  # type: ignore
         try:
-            logging.debug(
+            logger.debug(
                 'Trying to stat entry file, path "%s" on <%s>', entry, self.objname
             )
             entry_stat = entry.stat()
         except OSError as e:
-            logging.exception('Cannot stat entry file, path "%s"', entry, exc_info=e)
+            logger.exception('Cannot stat entry file, path "%s"', entry, exc_info=e)
             entry_stat = None
 
         return entry_stat
@@ -139,12 +183,12 @@ class Reader:
             filetype += " "
 
         try:
-            logging.debug('Trying to open %sfile, path "%s"', filetype, path)
+            logger.debug('Trying to open %sfile, path "%s"', filetype, path)
             with open(path, "rb") as f:
-                logging.debug('Trying to read %sfile, path "%s"', filetype, path)
+                logger.debug('Trying to read %sfile, path "%s"', filetype, path)
                 data = f.read()
         except OSError as e:
-            logging.exception(
+            logger.exception(
                 'Cannot open %sfile in ESET on path "%s"', filetype, path, exc_info=e
             )
             data = None
