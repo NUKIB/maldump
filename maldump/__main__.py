@@ -37,12 +37,8 @@ def main() -> None:
     # Switch to root partition
     os.chdir(args.root_dir)
 
-    if args.all_avs:
-        # Get a list of all supported avs
-        avs = AVManager.retrieve()
-    else:
-        # Get a list of all installed avs
-        avs = AVManager.detect()
+    # Get a list of all supported or all installed avs
+    avs = AVManager.retrieve() if args.all_avs else AVManager.detect()
 
     if args.quar:
         export_files(avs, dest)
