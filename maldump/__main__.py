@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from maldump.structures import Quarantine
 
 __version__ = "0.5.0"
-logger: logging.Logger | None = None
+logger = logging.getLogger(__name__)
 
 
 def main() -> None:
@@ -190,8 +190,7 @@ def parse_cli() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def init_logging(log_level: str) -> None:
-    global logger  # noqa: PLW0603
+def init_logging(log_level: str) -> None:  # noqa: PLW0603
     numeric_level = getattr(logging, log_level.upper(), None)
     if not isinstance(numeric_level, int):
         raise ValueError("Invalid log level: " + log_level)  # noqa: TRY004
@@ -203,7 +202,6 @@ def init_logging(log_level: str) -> None:
         level=numeric_level,
         format="%(asctime)s:%(levelname)s:%(name)s:%(module)s:%(message)s",
     )
-    logger = logging.getLogger(__name__)
     logger.debug("Logging started, logger initialized successfully")
     logger.info("Logging as user %s", getpass.getuser())
 
