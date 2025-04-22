@@ -33,8 +33,8 @@ def xor(plaintext: bytes, key: bytes) -> bytes:
 
 class Logger:
     @staticmethod
-    def log(_func: Callable | None = None, *, lgr: logging.Logger = logger):
-        def log_fn(func: Callable | None) -> Any:
+    def log(_func: Callable | None = None, *, lgr: logging.Logger = logger) -> Any:
+        def log_fn(func: Callable) -> Any:
             def wrapper(*args: tuple, **kwargs: dict) -> Any:
                 lgr.debug(
                     "Calling function: %s, arguments: %s, keyword arguments: %s",
