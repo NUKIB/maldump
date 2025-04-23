@@ -164,17 +164,14 @@ class Parser(Generic[T]):
 class Reader:
     @staticmethod
     def contents(path: Path, filetype: str = "") -> bytes | None:
-        if filetype:
-            filetype += " "
-
         try:
-            logger.debug('Trying to open %sfile, path "%s"', filetype, path)
+            logger.debug('Trying to open %s file, path "%s"', filetype, path)
             with open(path, "rb") as f:
-                logger.debug('Trying to read %sfile, path "%s"', filetype, path)
+                logger.debug('Trying to read %s file, path "%s"', filetype, path)
                 data = f.read()
         except OSError as e:
             logger.exception(
-                'Cannot open %sfile in ESET on path "%s"', filetype, path, exc_info=e
+                'Cannot open %s file in ESET on path "%s"', filetype, path, exc_info=e
             )
             data = None
 
