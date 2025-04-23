@@ -8,13 +8,11 @@ import contextlib
 import logging
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Callable, Generic, TypeVar
-from xml.etree.ElementTree import Element
 
 import kaitaistruct
 from arc4 import ARC4
 
-import maldump.parsers
-from maldump.constants import OperatingSystem
+from maldump.constants import OperatingSystem, UnloggedObjects
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -42,20 +40,7 @@ class Logger:
                     tuple(
                         (
                             arg
-                            if type(arg)
-                            not in {
-                                bytes,
-                                maldump.parsers.eset_parser.EsetParser,
-                                maldump.parsers.avast_parser.AvastParser,
-                                maldump.parsers.avg_parser.AVGParser,
-                                maldump.parsers.forticlient_parser.ForticlientParser,
-                                maldump.parsers.kaspersky_parser.KasperskyParser,
-                                maldump.parsers.malwarebytes_parser.MalwarebytesParser,
-                                maldump.parsers.mcafee_parser.McafeeParser,
-                                maldump.parsers.windef_parser.WindowsDefenderParser,
-                                maldump.parsers.kaitai.forticlient_parser.ForticlientParser.Timestamp,
-                                Element,
-                            }
+                            if type(arg) not in UnloggedObjects()
                             else "<" + type(arg).__name__ + ">"
                         )
                         for arg in args
