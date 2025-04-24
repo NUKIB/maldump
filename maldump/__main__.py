@@ -43,7 +43,7 @@ def main() -> None:
 
     # Switch to root partition
     os.chdir(args.root_dir)
-    
+
     logger.debug(
         'Working in directory "%s", files would be stored into "%s"', os.getcwd(), dest
     )
@@ -170,7 +170,6 @@ def parse_cli() -> argparse.Namespace:
         "-a", "--all", action="store_true", help="equivalent of running both -q and -m"
     )
     parser.add_argument(
-
         "-c",
         "--detect-avs",
         action="store_false",
