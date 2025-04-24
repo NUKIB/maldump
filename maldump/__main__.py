@@ -5,7 +5,9 @@ from __future__ import annotations
 import argparse
 import csv
 import ctypes
+import getpass
 import io
+import logging
 import os
 import sys
 import tarfile
@@ -20,14 +22,19 @@ if TYPE_CHECKING:
     from maldump.structures import Quarantine
 
 __version__ = "0.5.0"
+logger = logging.getLogger(__name__)
 
 
 def main() -> None:
     init()
     args = parse_cli()
+    init_logging(args.log_level)
 
     # Admin privileges are required for optimal function (windows only)
     if sys.platform == "win32" and not ctypes.windll.shell32.IsUserAnAdmin():
+        logger.critical(
+            "The program executed on Windows machine without proper privileges"
+        )
         print("Please try again with admin privileges")
         sys.exit(1)
 
@@ -36,9 +43,15 @@ def main() -> None:
 
     # Switch to root partition
     os.chdir(args.root_dir)
+    
+    logger.debug(
+        'Working in directory "%s", files would be stored into "%s"', os.getcwd(), dest
+    )
 
     # Get a list of all supported or all installed avs
     avs = AVManager.detect() if args.detect_avs else AVManager.retrieve()
+
+    logger.debug("Detected AVs: %s", [av.name for av in avs])
 
     if args.quar:
         export_files(avs, dest)
@@ -157,10 +170,18 @@ def parse_cli() -> argparse.Namespace:
         "-a", "--all", action="store_true", help="equivalent of running both -q and -m"
     )
     parser.add_argument(
+
         "-c",
         "--detect-avs",
         action="store_false",
         help="try only avs which were detected in the system",
+    )
+    parser.add_argument(
+        "-t",
+        "--log-level",
+        choices=["critical", "fatal", "error", "warn", "warning", "info", "debug"],
+        default="warning",
+        help="log level",
     )
     parser.add_argument(
         "-v", "--version", action="version", version="%(prog)s " + __version__
@@ -174,6 +195,22 @@ def parse_cli() -> argparse.Namespace:
     )
 
     return parser.parse_args()
+
+
+def init_logging(log_level: str) -> None:
+    numeric_level = getattr(logging, log_level.upper(), None)
+    if not isinstance(numeric_level, int):
+        raise ValueError("Invalid log level: " + log_level)  # noqa: TRY004
+    logging.basicConfig(
+        handlers=[
+            # logging.FileHandler("syslog.log", mode="w", encoding="utf-8"),
+            logging.StreamHandler(sys.stderr)
+        ],
+        level=numeric_level,
+        format="%(asctime)s:%(levelname)s:%(name)s:%(module)s:%(message)s",
+    )
+    logger.debug("Logging started, logger initialized successfully")
+    logger.info("Logging as user %s", getpass.getuser())
 
 
 if __name__ == "__main__":

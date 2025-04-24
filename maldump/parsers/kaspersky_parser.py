@@ -1,15 +1,22 @@
 from __future__ import annotations
 
+import logging
 import sqlite3
 from datetime import datetime
 
 from maldump.constants import ThreatMetadata
 from maldump.structures import Parser, QuarEntry
 from maldump.utils import DatetimeConverter as DTC
+from maldump.utils import Logger as log
+from maldump.utils import Parser as parse
+from maldump.utils import Reader as read
 from maldump.utils import xor
+
+logger = logging.getLogger(__name__)
 
 
 class KasperskyParser(Parser):
+    @log.log(lgr=logger)
     def _normalize_time(self, number: int) -> datetime:
         year = (number >> 48) & 0xFFFF
         month = (number >> 40) & 0xFF
@@ -20,22 +27,41 @@ class KasperskyParser(Parser):
 
         return datetime(year, month, days, hours, minutes, seconds)
 
+    @log.log(lgr=logger)
     def _get_malfile(self, data) -> bytes:
         file = self.location / data
-        key = [0xE2, 0x45, 0x48, 0xEC, 0x69, 0x0E, 0x5C, 0xAC]
-        with open(file, "rb") as f:
-            return xor(f.read(), key)
+        key = bytes([0xE2, 0x45, 0x48, 0xEC, 0x69, 0x0E, 0x5C, 0xAC])
+
+        data = read.contents(file, filetype="malware")
+        if data is None:
+            return b""
+
+        return xor(data, key)
 
     def parse_from_log(self, _=None) -> dict[str, QuarEntry]:
+        logger.info("Parsing from log in %s", self.name)
         quarfiles = {}
 
+        db_file = self.location.joinpath("quarantine.db").resolve()
         try:
-            conn = sqlite3.connect(self.location.joinpath("quarantine.db").resolve())
+            logger.debug(
+                'Trying to open and read from database file, path "%s"', db_file
+            )
+            conn = sqlite3.connect(db_file)
+            logger.debug('Opening cursor to a database connection, path "%s"', db_file)
             cursor = conn.cursor()
+            logger.debug(
+                'Exectuting a command with a database connection, path "%s"', db_file
+            )
             cursor.execute("SELECT * FROM 'objects'")
             rows = cursor.fetchall()
         except sqlite3.Error as e:
-            print("Kaspersky DB Error: " + str(e))
+            logger.exception(
+                'Cannot open nor read from a database file, path "%s"',
+                db_file,
+                exc_info=e,
+            )
+            return {}
 
         for row in rows:
             filename = row[0]
@@ -55,20 +81,27 @@ class KasperskyParser(Parser):
     def parse_from_fs(
         self, data: dict[str, QuarEntry] | None = None
     ) -> dict[str, QuarEntry]:
+        logger.info("Parsing from filesystem in %s", self.name)
         quarfiles = {}
 
-        for entry in self.location.glob("{*}"):
+        for idx, entry in enumerate(self.location.glob("{*}")):
+            logger.debug('Parsing entry, idx %s, path "%s"', idx, entry)
             if not entry.is_file():
+                logger.debug("Entry (idx %s) is not a file, skipping", idx)
                 continue
 
             filename = entry.name
 
             if filename in data:
+                logger.debug("Entry (idx %s) already found, skipping", idx)
                 continue
 
             malfile = self._get_malfile(filename)
 
-            entry_stat = entry.stat()
+            entry_stat = parse(self).entry_stat(entry)
+            if entry_stat is None:
+                logger.debug('Skipping entry idx %s, path "%s"', idx, entry)
+                continue
             timestamp = DTC.get_dt_from_stat(entry_stat)
             size = entry_stat.st_size
 
