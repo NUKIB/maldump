@@ -2,8 +2,6 @@ from enum import Enum
 from typing import Any
 from xml.etree.ElementTree import Element
 
-import maldump.parsers
-
 
 class OperatingSystem(Enum):
     WINDOWS = "windows"
@@ -15,21 +13,33 @@ class ThreatMetadata(str, Enum):
     UNKNOWN_THREAT = "Unknown-no-metadata"
 
 
-class UnloggedObjects(object):
-    _unlogged = {
-        bytes,
-        maldump.parsers.eset_parser.EsetParser,
-        maldump.parsers.avast_parser.AvastParser,
-        maldump.parsers.avg_parser.AVGParser,
-        maldump.parsers.forticlient_parser.ForticlientParser,
-        maldump.parsers.kaspersky_parser.KasperskyParser,
-        maldump.parsers.malwarebytes_parser.MalwarebytesParser,
-        maldump.parsers.mcafee_parser.McafeeParser,
-        maldump.parsers.windef_parser.WindowsDefenderParser,
-        maldump.parsers.kaitai.forticlient_parser.ForticlientParser.Timestamp,
-        Element,
-    }
+class UnloggedObjects:
+    @staticmethod
+    def __contains__(item: Any) -> bool:
+        from maldump.parsers.avast_parser import AvastParser
+        from maldump.parsers.avg_parser import AVGParser
+        from maldump.parsers.eset_parser import EsetParser
+        from maldump.parsers.forticlient_parser import ForticlientParser
+        from maldump.parsers.kaitai.forticlient_parser import (
+            ForticlientParser as ForticlientKaitaiParser,
+        )
+        from maldump.parsers.kaspersky_parser import KasperskyParser
+        from maldump.parsers.malwarebytes_parser import MalwarebytesParser
+        from maldump.parsers.mcafee_parser import McafeeParser
+        from maldump.parsers.windef_parser import WindowsDefenderParser
 
-    @classmethod
-    def __contains__(cls, item: Any) -> bool:
-        return item in cls._unlogged
+        unlogged = {
+            bytes,
+            EsetParser,
+            AvastParser,
+            AVGParser,
+            ForticlientParser,
+            KasperskyParser,
+            MalwarebytesParser,
+            McafeeParser,
+            WindowsDefenderParser,
+            ForticlientKaitaiParser.Timestamp,
+            Element,
+        }
+
+        return item in unlogged
