@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import logging
 import re
-import sys
 import zipfile
 from datetime import datetime as dt
 from typing import TypedDict
@@ -10,6 +10,9 @@ from zipfile import ZipFile
 import defusedxml.ElementTree as ET
 
 from maldump.structures import Parser, QuarEntry
+from maldump.utils import Logger as log
+
+logger = logging.getLogger(__name__)
 
 
 class McafeeFileData(TypedDict):
@@ -35,10 +38,15 @@ class McafeeParser(Parser):
     def parse_from_fs(
         self, _: dict[str, QuarEntry] | None = None
     ) -> dict[str, QuarEntry]:
+        logger.info("Parsing from filesystem in %s", self.name)
         quarfiles = {}
 
-        for metafile in self.location.glob("*.zip"):
+        for idx, metafile in enumerate(self.location.glob("*.zip")):
+            logger.debug('Parsing entry, idx %s, path "%s"', idx, metafile)
             parser = self._get_data(file_name=metafile)
+            if parser is None:
+                logger.debug('Skipping entry idx %s, path "%s"', idx, metafile)
+
             q = QuarEntry()
             q.timestamp = dt.strptime(parser["timestamp"], "%Y-%m-%d %H:%M:%S")
             q.threat = parser["threat"]
@@ -49,12 +57,24 @@ class McafeeParser(Parser):
 
         return quarfiles
 
-    def _get_data(self, file_name: str) -> McafeeFileData:
+    @log.log(lgr=logger)
+    def _get_data(self, file_name: str) -> McafeeFileData | None:
         # unzip file
-        if zipfile.is_zipfile(filename=file_name):
+        logger.debug('Checking if file is a ZIP file, path "%s"', file_name)
+        if not zipfile.is_zipfile(filename=file_name):
+            logger.warning(
+                'File is not a ZIP file "%s" in class %s.', file_name, self.__name__
+            )
+            return None
+
+        try:
+            logger.debug('Trying to open a ZIP file, path "%s"', file_name)
             with ZipFile(file=file_name, mode="r") as archive:
-                archive.setpassword(f"{self._zip_password}".encode())
-                for file in archive.namelist():
+                logger.debug("Setting a passford for a ZIP file")
+                archive.setpassword(self._zip_password.encode())
+
+                for idx, file in enumerate(archive.namelist()):
+                    logger.debug('Traversing a ZIP file, idx %s, file: "%s"', idx, file)
                     # save files to private variables
                     text = archive.read(file).decode(encoding="utf-8")
                     if re.search(self._re_xml, text) and self._xml_data == "":
@@ -62,20 +82,29 @@ class McafeeParser(Parser):
                     elif self._raw_malware == "" and not re.search(self._re_xml, text):
                         self._raw_malware = text
                 return self._read()
-        else:
-            print(
-                f"Error durring unziping zip file {file_name} in class {self.__name__}."
+
+        except RuntimeError as e:
+            logger.exception(
+                'Cannot open a ZIP file on path "%s"', file_name, exc_info=e
             )
-            sys.exit()
 
-    def _read(self) -> McafeeFileData:
-        root = ET.fromstring(self._xml_data)
-        parser = {}
+        return None
 
-        parser["timestamp"] = root.find("creationTime").text
-        parser["threat"] = root.find("detectionName").text
-        parser["file_name"] = root.find("Files/File/originalPath").text
-        parser["size"] = root.find("Files/File/size").text
-        parser["mal_file"] = bytes(self._raw_malware, "utf-8")
+    @log.log(lgr=logger)
+    def _read(self) -> McafeeFileData | None:
+        try:
+            logger.debug("Trying to parse an XML file from data in McAfee")
+            root = ET.fromstring(self._xml_data)
+        except ET.ParseError as e:
+            logger.exception("Cannot parse an XML file in McAfee", exc_info=e)
+            return None
 
-        return parser
+        parser = {
+            "timestamp": root.find("creationTime").text,
+            "threat": root.find("detectionName").text,
+            "file_name": root.find("Files/File/originalPath").text,
+            "size": root.find("Files/File/size").text,
+            "mal_file": bytes(self._raw_malware, "utf-8"),
+        }
+
+        return McafeeFileData(**parser)
