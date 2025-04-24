@@ -29,8 +29,21 @@ class AvastParser(Parser):
     @log.log(lgr=logger)
     def __del__(self):
         if hasattr(self, "db"):
-            self.db.close()
-            unlink(self.tmpfile)
+            logger.debug(
+                "Deleting parser object, closing database file, unlinking tmp file"
+            )
+
+            if self.db is not None:
+                self.db.close()
+
+            try:
+                logger.debug('Trying to delete temporary file "%s"', self.tmpfile)
+                if self.tmpfile is not None:
+                    unlink(self.tmpfile)
+            except OSError as e:
+                logger.exception(
+                    'Cannot unlink temporary file "%s"', self.tmpfile, exc_info=e
+                )
 
     @log.log(lgr=logger)
     def _initDB(self) -> bool:
@@ -40,7 +53,7 @@ class AvastParser(Parser):
                 'Trying to parse index.xml file "%s"', self.location / "index.xml"
             )
             self.root = ET.parse(self.location / "index.xml").getroot()
-        except ParseError as e:
+        except (ParseError, OSError) as e:
             logger.exception("Cannot open and parse index.xml", exc_info=e)
             return False
 

@@ -39,3 +39,8 @@ class AVManager:
     def detect(cls) -> list[Quarantine]:
         """Returns a list of avs installed on the system"""
         return [av for av in cls.avs if av.location.exists()]
+
+    @classmethod
+    def retrieve(cls) -> list[Quarantine]:
+        """Returns a list of all supported avs"""
+        return cls.avs

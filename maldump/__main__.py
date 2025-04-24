@@ -48,8 +48,8 @@ def main() -> None:
         'Working in directory "%s", files would be stored into "%s"', os.getcwd(), dest
     )
 
-    # Get a list of all installed avs
-    avs = AVManager.detect()
+    # Get a list of all supported or all installed avs
+    avs = AVManager.detect() if args.detect_avs else AVManager.retrieve()
 
     logger.debug("Detected AVs: %s", [av.name for av in avs])
 
@@ -168,6 +168,12 @@ def parse_cli() -> argparse.Namespace:
     )
     parser.add_argument(
         "-a", "--all", action="store_true", help="equivalent of running both -q and -m"
+    )
+    parser.add_argument(
+        "-c",
+        "--detect-avs",
+        action="store_false",
+        help="try only avs which were detected in the system",
     )
     parser.add_argument(
         "-t",
