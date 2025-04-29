@@ -31,20 +31,37 @@ def xor(plaintext: bytes, key: bytes) -> bytes:
 
 class Logger:
     @staticmethod
+    def logify(obj: Any):
+        return (
+            {key: Logger.logify(value) for key, value in obj.items()}
+            if isinstance(obj, dict)
+            else (
+                [Logger.logify(value) for value in obj]
+                if isinstance(obj, list)
+                else (
+                    {Logger.logify(value) for value in obj}
+                    if isinstance(obj, set)
+                    else (
+                        (Logger.logify(value) for value in obj)
+                        if isinstance(obj, tuple)
+                        else (
+                            "<" + type(obj).__name__ + ">"
+                            if type(obj) in UnloggedObjects()
+                            else obj
+                        )
+                    )
+                )
+            )
+        )
+
+    @staticmethod
     def log(_func: Callable | None = None, *, lgr: logging.Logger = logger) -> Any:
         def log_fn(func: Callable) -> Any:
             def wrapper(*args: tuple, **kwargs: dict) -> Any:
                 lgr.debug(
                     "Calling function: %s, arguments: %s, keyword arguments: %s",
                     func.__name__,
-                    tuple(
-                        (
-                            arg
-                            if type(arg) not in UnloggedObjects()
-                            else "<" + type(arg).__name__ + ">"
-                        )
-                        for arg in args
-                    ),
+                    tuple((Logger.logify(arg)) for arg in args),
                     kwargs,
                 )
                 return func(*args, **kwargs)
