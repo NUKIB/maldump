@@ -93,6 +93,7 @@ types:
             'opcode::firstseen': unixdate
             'opcode::unknown_hash': hash
             'opcode::unknown_hash2': hash
+            'opcode::unknown_hash3': hash
             'opcode::program_hash': hash
             'opcode::object_hash': hash
             'opcode::unknown_u1int1': u1
@@ -200,6 +201,9 @@ enums:
     0x4213a4:
       id: "unknown_hash2"
       -orig-id: UNKNOWN_HASH2
+    0x4213ab:
+      id: "unknown_hash3"
+      -orig-id: UNKNOWN_HASH3
     0x450fa0:
       id: "unknown_u4int6"
       -orig-id: UNKNOWN_U4INT6
