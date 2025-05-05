@@ -66,7 +66,9 @@ def parseRecord(record: dict):
             else None
         ),
         "user": (
-            record.get("user_name").str if record.get("user_name") is not None else None
+            record.get("user_name").str.split("\\")[1]
+            if record.get("user_name") is not None
+            else None
         ),
         "progname": (
             record.get("program_name").str
@@ -162,7 +164,7 @@ class EsetParser(Parser):
             if metadata["user"] == "SYSTEM":
                 logger.debug("Entry's (idx %s) user is SYSTEM, skipping", idx)
                 continue
-            q = QuarEntry()
+            q = QuarEntry(self)
             q.timestamp = metadata["timestamp"]
             q.threat = metadata["infiltration"]
             q.path = metadata["obj"]
@@ -218,7 +220,7 @@ class EsetParser(Parser):
                 size = kt.mal_size
                 threat = kt.findings[0].threat_canonized.str
 
-            q = QuarEntry()
+            q = QuarEntry(self)
             q.timestamp = timestamp
             q.path = path
             q.sha1 = sha1
