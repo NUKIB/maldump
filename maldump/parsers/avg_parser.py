@@ -138,7 +138,7 @@ class AVGParser(Parser):
             else:
                 malfile = self._getRawFromFile(chest_id)
 
-            q = QuarEntry()
+            q = QuarEntry(self)
             q.timestamp = dt.fromtimestamp(int(get(e, "TransferTime")))
             q.threat = get(e, "Virus")
             q.path = path
@@ -180,7 +180,7 @@ class AVGParser(Parser):
             timestamp = DTC.get_dt_from_stat(entry_stat)
             size = entry_stat.st_size
 
-            q = QuarEntry()
+            q = QuarEntry(self)
             q.path = str(entry)
             q.timestamp = timestamp
             q.size = size

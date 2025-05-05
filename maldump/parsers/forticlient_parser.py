@@ -37,7 +37,7 @@ class ForticlientParser(Parser):
                 logger.debug('Skipping entry idx %s, path "%s"', idx, metafile)
                 continue
 
-            q = QuarEntry()
+            q = QuarEntry(self)
             q.timestamp = self._get_time(kt.timestamp)
             q.threat = kt.mal_type
             q.path = self._normalize_path(kt.mal_path)

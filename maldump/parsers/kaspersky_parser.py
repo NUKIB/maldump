@@ -66,7 +66,7 @@ class KasperskyParser(Parser):
         for row in rows:
             filename = row[0]
             malfile = self._get_malfile(filename)
-            q = QuarEntry()
+            q = QuarEntry(self)
             q.timestamp = self._normalize_time(row[6])
             q.threat = row[3]
             q.path = row[1] + row[2]
@@ -105,7 +105,7 @@ class KasperskyParser(Parser):
             timestamp = DTC.get_dt_from_stat(entry_stat)
             size = entry_stat.st_size
 
-            q = QuarEntry()
+            q = QuarEntry(self)
             q.path = str(entry)
             q.timestamp = timestamp
             q.size = size
