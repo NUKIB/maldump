@@ -19,8 +19,8 @@ class UnloggedObjects:
         from maldump.parsers.avast_parser import AvastParser
         from maldump.parsers.avg_parser import AVGParser
         from maldump.parsers.eset_parser import EsetParser
-        from maldump.parsers.kaitai.eset_virlog_parser import EsetVirlogParser
         from maldump.parsers.forticlient_parser import ForticlientParser
+        from maldump.parsers.kaitai.eset_virlog_parser import EsetVirlogParser
         from maldump.parsers.kaitai.forticlient_parser import (
             ForticlientParser as ForticlientKaitaiParser,
         )
