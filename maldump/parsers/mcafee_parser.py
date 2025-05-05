@@ -47,7 +47,7 @@ class McafeeParser(Parser):
             if parser is None:
                 logger.debug('Skipping entry idx %s, path "%s"', idx, metafile)
 
-            q = QuarEntry()
+            q = QuarEntry(self)
             q.timestamp = dt.strptime(parser["timestamp"], "%Y-%m-%d %H:%M:%S")
             q.threat = parser["threat"]
             q.path = parser["file_name"]

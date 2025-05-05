@@ -21,7 +21,8 @@ class QuarEntry:
     sha256: str | None = None
     _malfile: bytes
 
-    def __init__(self) -> None: ...
+    def __init__(self, av: Parser) -> None:
+        self.av = av
 
     @property
     def malfile(self) -> bytes:

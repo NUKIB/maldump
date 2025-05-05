@@ -63,7 +63,7 @@ class WindowsDefenderParser(Parser):
 
                 guid = e.entry.element[0].content.value.hex().upper()
                 malfile = self._get_malfile(guid)
-                q = QuarEntry()
+                q = QuarEntry(self)
                 q.timestamp = ts
                 q.threat = kt.data1.mal_type
                 q.path = self._normalize(e.entry.path.character)
@@ -106,7 +106,7 @@ class WindowsDefenderParser(Parser):
                 logger.debug('Skipping entry idx %s, path "%s"', idx, entry)
                 continue
 
-            q = QuarEntry()
+            q = QuarEntry(self)
             q.path = str(entry)
             q.timestamp = timestamp
             q.size = kt_data.encryptedfile.len_malfile

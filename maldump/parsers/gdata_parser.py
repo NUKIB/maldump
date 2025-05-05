@@ -25,7 +25,7 @@ class GdataParser(Parser):
                 logger.debug('Skipping entry idx %s, path "%s"', idx, metafile)
                 continue
 
-            q = QuarEntry()
+            q = QuarEntry(self)
             q.timestamp = parse(self).timestamp(kt.data1.quatime)
             q.threat = kt.data1.malwaretype.string_content
             q.path = kt.data2.path.string_content[4:]

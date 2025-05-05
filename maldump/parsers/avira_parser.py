@@ -24,8 +24,7 @@ class AviraParser(Parser):
                 logger.debug('Skipping entry idx %s, path "%s"', idx, metafile)
                 continue
 
-            q = QuarEntry()
-
+            q = QuarEntry(self)
             q.timestamp = parse(self).timestamp(kt.qua_time)
             q.threat = kt.mal_type
             q.path = kt.filename[4:]

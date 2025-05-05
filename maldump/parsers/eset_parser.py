@@ -47,13 +47,39 @@ __status__ = "Development"
 def parseRecord(record: dict):
     return {
         "timestamp": record.get("timestamp"),
-        "virusdb": record.get("virus_db").str,
-        "obj": record.get("object_name").str,
-        "objhash": record.get("object_hash").hash.hex(),
-        "infiltration": record.get("infiltration_name").str,
-        "user": record.get("user_name").str.split("\\")[1],
-        "progname": record.get("program_name").str,
-        "proghash": record.get("program_hash").hash.hex(),
+        "virusdb": (
+            record.get("virus_db").str if record.get("virus_db") is not None else None
+        ),
+        "obj": (
+            record.get("object_name").str
+            if record.get("object_name") is not None
+            else None
+        ),
+        "objhash": (
+            record.get("object_hash").hash.hex()
+            if record.get("object_hash") is not None
+            else None
+        ),
+        "infiltration": (
+            record.get("infiltration_name").str
+            if record.get("infiltration_name") is not None
+            else None
+        ),
+        "user": (
+            record.get("user_name").str.split("\\")[1]
+            if record.get("user_name") is not None
+            else None
+        ),
+        "progname": (
+            record.get("program_name").str
+            if record.get("program_name") is not None
+            else None
+        ),
+        "proghash": (
+            record.get("program_hash").hash.hex()
+            if record.get("program_hash") is not None
+            else None
+        ),
         "firstseen": record.get("firstseen"),
     }
 
@@ -138,11 +164,13 @@ class EsetParser(Parser):
             if metadata["user"] == "SYSTEM":
                 logger.debug("Entry's (idx %s) user is SYSTEM, skipping", idx)
                 continue
-            q = QuarEntry()
+            q = QuarEntry(self)
             q.timestamp = metadata["timestamp"]
             q.threat = metadata["infiltration"]
             q.path = metadata["obj"]
             q.malfile = self._get_malfile(metadata["user"], metadata["objhash"])
+            if (q.sha1, metadata["user"]) in quarfiles:
+                logger.debug("Entry (idx %s) already found, skipping", idx)
             quarfiles[q.sha1, metadata["user"]] = q
 
         return quarfiles
@@ -192,7 +220,7 @@ class EsetParser(Parser):
                 size = kt.mal_size
                 threat = kt.findings[0].threat_canonized.str
 
-            q = QuarEntry()
+            q = QuarEntry(self)
             q.timestamp = timestamp
             q.path = path
             q.sha1 = sha1

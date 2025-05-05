@@ -23,6 +23,7 @@ class EsetVirlogParser(KaitaiStruct):
         object_hash = 4330398
         unknown_hash = 4330400
         unknown_hash2 = 4330404
+        unknown_hash3 = 4330411
         unknown_u1int2 = 4398415
         unknown_u1int1 = 4398455
         unknown_u4int10 = 4522986
@@ -262,6 +263,8 @@ class EsetVirlogParser(KaitaiStruct):
                 self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
             elif _on == EsetVirlogParser.Opcode.object_name:
                 self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
+            elif _on == EsetVirlogParser.Opcode.unknown_hash3:
+                self.arg = EsetVirlogParser.Hash(self._io, self, self._root)
             elif _on == EsetVirlogParser.Opcode.unknown_u8int1:
                 self.arg = self._io.read_u8le()
             elif _on == EsetVirlogParser.Opcode.unknown_u4int13:
