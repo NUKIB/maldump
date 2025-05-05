@@ -31,7 +31,7 @@ def xor(plaintext: bytes, key: bytes) -> bytes:
 
 class Logger:
     @staticmethod
-    def logify(obj: Any):
+    def logify(obj: Any) -> Any:
         return (
             {key: Logger.logify(value) for key, value in obj.items()}
             if isinstance(obj, dict)
@@ -42,7 +42,7 @@ class Logger:
                     {Logger.logify(value) for value in obj}
                     if isinstance(obj, set)
                     else (
-                        (Logger.logify(value) for value in obj)
+                        tuple(Logger.logify(value) for value in obj)
                         if isinstance(obj, tuple)
                         else (
                             "<" + type(obj).__name__ + ">"
