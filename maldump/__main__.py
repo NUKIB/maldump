@@ -172,7 +172,7 @@ def parse_cli() -> argparse.Namespace:
     parser.add_argument(
         "-c",
         "--detect-avs",
-        action="store_false",
+        action="store_true",
         help="try only avs which were detected in the system",
     )
     parser.add_argument(
