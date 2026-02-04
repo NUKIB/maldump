@@ -131,9 +131,12 @@ class EsetParser(Parser):
 
     @log.log(lgr=logger)
     def _get_malfile(self, username: str, sha1: str) -> bytes:
-        quarfile = self.quarpath.format(username=username)
-        quarfile = Path(quarfile) / (sha1.upper() + ".NQF")
-
+        if username == "ProgramData":
+            quarfile = Path("ProgramData/ESET/ESET Security/Quarantine/") / (sha1.upper() + ".NQF")
+        else:
+            quarfile = self.quarpath.format(username=username)
+            quarfile = Path(quarfile) / (sha1.upper() + ".NQF")
+                
         data = read.contents(quarfile, filetype="malware")
         if data is None:
             return b""
@@ -183,7 +186,8 @@ class EsetParser(Parser):
 
         actual_path = Path("Users/")
         for idx, entry in enumerate(
-            actual_path.glob("*/AppData/Local/ESET/ESET Security/Quarantine/*.NQF")
+            list(actual_path.glob("*/AppData/Local/ESET/ESET Security/Quarantine/*.NQF")) +
+            list(Path("ProgramData/").glob("ESET/ESET Security/Quarantine/*.NQF"))
         ):
             logger.debug('Parsing entry, idx %s, path "%s"', idx, entry)
             res_path = re.match(self.regex_entry, entry.name)
@@ -195,7 +199,7 @@ class EsetParser(Parser):
                 )
                 continue
 
-            user = res_user.group(1)
+            user = res_user.group(1) if res_user else "ProgramData"
             objhash = res_path.group(1)
 
             if (objhash.lower(), user) in data:
