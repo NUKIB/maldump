@@ -40,45 +40,69 @@ def main() -> None:
 
     # Save the destination directory
     dest: Path = args.dest.resolve()
+    root_dir = args.root_dir
+    quar_entires: list[QuarEntry] = []
 
+
+    if not args.velociraptor:
+        quar_entires.extend(run_in_one_root(
+            root_dir, 
+            args.detect_avs,
+        ))
+    else:
+        for directory in os.listdir(root_dir):
+            new_root_dir = os.path.join(root_dir, directory, 'uploads', 'auto', 'C%3A')
+            if not os.path.isdir(new_root_dir):
+                continue
+
+            quar_entires.extend(run_in_one_root(
+                new_root_dir, 
+                args.detect_avs
+            ))
+
+    if args.quar or args.all:
+        export_files(quar_entires, dest)
+
+    if args.meta or args.all:
+        export_meta(quar_entires, dest)
+    
+    list_files(quar_entires)
+
+    
+
+def run_in_one_root(root_dir, detect_avs) -> list[QuarEntry]:
     # Switch to root partition
-    os.chdir(args.root_dir)
+    os.chdir(root_dir)
 
     logger.debug(
-        'Working in directory "%s", files would be stored into "%s"', os.getcwd(), dest
+        'Working in directory "%s"', os.getcwd()
     )
 
     # Get a list of all supported or all installed avs
-    avs = AVManager.detect() if args.detect_avs else AVManager.retrieve()
+    avs = AVManager.detect() if detect_avs else AVManager.retrieve()
 
     logger.debug("Detected AVs: %s", [av.name for av in avs])
 
-    if args.quar:
-        export_files(avs, dest)
-    elif args.meta:
-        export_meta(avs, dest)
-    elif args.all:
-        export_files(avs, dest)
-        export_meta(avs, dest)
-    else:
-        list_files(avs)
+    quar_entires: list[QuarEntry] = []
+    for av in avs:
+        quar_entires.extend(av.export())
+
+    return quar_entires
 
 
 def export_files(
-    avs: list[Quarantine], dest: Path, out_file: str = "quarantine.tar"
+    quar_entries: list[QuarEntry], dest: Path, out_file: str = "quarantine.tar"
 ) -> None:
     total = 0
-    for av in avs:
-        entries = av.export()
-        if (len(entries)) > 0:
-            tar_path = dest.joinpath(out_file)
-            tar = tarfile.open(tar_path, total and "a" or "w")
-            total += len(entries)
-            for entry in entries:
-                tarinfo = tarfile.TarInfo(av.name + "/" + entry.md5)
-                tarinfo.size = len(entry.malfile)
-                tar.addfile(tarinfo, io.BytesIO(entry.malfile))
-            tar.close()
+    if (len(quar_entries)) > 0:
+        tar_path = dest.joinpath(out_file)
+        tar = tarfile.open(tar_path, total and "a" or "w")
+        total += len(quar_entries)
+        for entry in quar_entries:
+            tarinfo = tarfile.TarInfo(av.name + "/" + entry.md5)
+            tarinfo.size = len(entry.malfile)
+            tar.addfile(tarinfo, io.BytesIO(entry.malfile))
+        tar.close()
     if total > 0:
         print(f"Exported {total} object(s) into '{out_file}'")
     else:
@@ -86,15 +110,9 @@ def export_files(
 
 
 def export_meta(
-    avs: list[Quarantine], dest: Path, meta_file: str = "quarantine.csv"
+    quar_entries: list[QuarEntry], dest: Path, meta_file: str = "quarantine.csv"
 ) -> None:
-    entries = []
-    for av in avs:
-        for e in av.export():
-            d = vars(e)
-            d.update(antivirus=av.name)
-            entries.append(d)
-    if len(entries) > 0:
+    if len(quar_entries) > 0:
         csv_path = dest.joinpath(meta_file)
         with open(csv_path, "w", encoding="utf-8", newline="") as f:
             fields = [
@@ -102,6 +120,7 @@ def export_meta(
                 "antivirus",
                 "threat",
                 "path",
+                "orig_path",
                 "size",
                 "md5",
                 "sha1",
@@ -109,27 +128,21 @@ def export_meta(
             ]
             writer = csv.DictWriter(f, fields, extrasaction="ignore")
             writer.writeheader()
-            writer.writerows(entries)
-        print(f"Written {len(entries)} row(s) into file '{meta_file}'")
+            writer.writerows(vars(e) for e in quar_entries)
+        print(f"Written {len(quar_entries)} row(s) into file '{meta_file}'")
     else:
         print(
             f"The file '{meta_file}' wasn't created as there is nothing in quarantine"
         )
 
 
-def list_files(avs: list[Quarantine]) -> None:
-    quarantined_file_exists = False
-    for i, av in enumerate(avs):
-        entries = av.export()
-        if len(entries) > 0:
-            quarantined_file_exists = True
-            if i != 0:
-                print()
-            print(Fore.YELLOW + "---", av.name, "---" + Style.RESET_ALL)
-            for e in entries:
-                print(e.path)
-    if not quarantined_file_exists:
+def list_files(quar_entries: list[QuarEntry]) -> None:
+    if not quar_entries:
         print("No quarantined files found!")
+        return
+
+    for e in quar_entries:
+        print(e.path)
 
 
 def parse_cli() -> argparse.Namespace:
@@ -179,8 +192,13 @@ def parse_cli() -> argparse.Namespace:
         "-t",
         "--log-level",
         choices=["critical", "fatal", "error", "warn", "warning", "info", "debug"],
-        default="warning",
+        default="error",
         help="log level",
+    )
+    parser.add_argument(
+        "--velociraptor",
+        action="store_true",
+        help="load quarantine from velociraptor dump",
     )
     parser.add_argument(
         "-v", "--version", action="version", version="%(prog)s " + __version__

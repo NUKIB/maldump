@@ -15,6 +15,7 @@ class QuarEntry:
     timestamp: dt
     threat: str
     path: str
+    orig_path: str | None
     size: int | None = None
     _md5: str | None = None
     sha1: str | None = None

@@ -3,6 +3,7 @@ meta:
   title: ESET Antivirus quarantine metadata file parser (NDF)
   file-extension: NDF
   endian: le
+  
 seq:
   - id: magic
     size: 0x08
@@ -31,19 +32,8 @@ types:
     seq:
       - id: mal_path
         type: widestr
-      - id: date_block_size
-        type: u4
-      - id: date_block_header
-        size: 0x04
-        contents: [ 0x4e, 0x49, 0x57, 0x49 ]  # NIWI
-      - id: datetime_quar_enc_start
-        type: windate
-      - id: datetime_first_utc
-        type: windate
-      - id: datetime_quar_enc_stop
-        type: windate
-      - id: unknown_size
-        type: u4
+      - id: date_block
+        type: dateblock
       - id: datetime_latest_occurence
         type: unixdate
       - id: filler1
@@ -64,6 +54,28 @@ types:
         type: unixdate
       - id: mal_path2
         type: widestr
+
+  dateblock:
+    seq:
+      - id: date_block_size
+        type: u4
+      - id: date_block_contents
+        type: dateblock_contents
+        if: date_block_size != 0
+
+  dateblock_contents:
+    seq:
+      - id: date_block_header
+        size: 0x04
+        contents: [ 0x4e, 0x49, 0x57, 0x49 ]  # NIWI
+      - id: datetime_quar_enc_start
+        type: windate
+      - id: datetime_first_utc
+        type: windate
+      - id: datetime_quar_enc_stop
+        type: windate
+      - id: unknown_size
+        type: u4
 
   windate:
     seq:

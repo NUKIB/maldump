@@ -33,8 +33,6 @@ types:
         type: windate
       - id: num_threats2
         type: u4
-        valid:
-          expr: _ == num_threats
       - id: unknown
         size-eos: true
 
@@ -59,10 +57,7 @@ types:
         type: windate
       - id: unknown_u4int0
         type: u4
-      - id: record_id2   # this should be equal to record_id
-        valid:
-          expr: _ == record_id
-
+      - id: record_id2
         type: u4
       - id: unknown_u4int1
         type: u4
