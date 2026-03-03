@@ -54,7 +54,7 @@ class AvastParser(Parser):
             )
             self.root = ET.parse(self.location / "index.xml").getroot()
         except (ParseError, OSError) as e:
-            logger.exception("Cannot open and parse index.xml", exc_info=e)
+            logger.info("Cannot open and parse index.xml", exc_info=e)
             return False
 
         # Decrypt vault.db and prepare db connection
@@ -65,7 +65,7 @@ class AvastParser(Parser):
             with open(self.tmpfile, "wb") as f:
                 f.write(self._decryptVault("$AV_ASW/$VAULT/vault.db"))
         except OSError as e:
-            logger.exception("Cannot open nor write temporary file", exc_info=e)
+            logger.warning("Cannot open nor write temporary file", exc_info=e)
             return False
 
         try:
@@ -74,7 +74,7 @@ class AvastParser(Parser):
             )
             self.db = sqlite3.connect(self.tmpfile)
         except sqlite3.Error as e:
-            logger.exception("Cannot connect to SQLite3 chest database", exc_info=e)
+            logger.warning("Cannot connect to SQLite3 chest database", exc_info=e)
             print("Avast DB Error: " + str(e))
             return False
 

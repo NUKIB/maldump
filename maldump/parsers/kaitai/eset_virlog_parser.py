@@ -1,21 +1,18 @@
 # This is a generated file! Please edit source .ksy file and use kaitai-struct-compiler to rebuild
+# type: ignore
 
 import kaitaistruct
 from kaitaistruct import KaitaiStruct, KaitaiStream, BytesIO
-from enum import Enum
+from enum import IntEnum
 import maldump.utils
 
 
-if getattr(kaitaistruct, "API_VERSION", (0, 9)) < (0, 9):
-    raise Exception(
-        "Incompatible Kaitai Struct Python API: 0.9 or later is required, but you have %s"
-        % (kaitaistruct.__version__)
-    )
-
+if getattr(kaitaistruct, 'API_VERSION', (0, 9)) < (0, 11):
+    raise Exception("Incompatible Kaitai Struct Python API: 0.11 or later is required, but you have %s" % (kaitaistruct.__version__))
 
 class EsetVirlogParser(KaitaiStruct):
 
-    class Opcode(Enum):
+    class Opcode(IntEnum):
         unknown_u4int14 = 4259844
         unknown_u4int15 = 4259845
         unknown_u4int16 = 4259850
@@ -51,145 +48,310 @@ class EsetVirlogParser(KaitaiStruct):
         path_name = 5116841
         infiltration_name = 5119309
         virus_db = 5121815
-
     def __init__(self, _io, _parent=None, _root=None):
-        self._io = _io
+        super(EsetVirlogParser, self).__init__(_io)
         self._parent = _parent
-        self._root = _root if _root else self
+        self._root = _root or self
         self._read()
 
     def _read(self):
         self.magic = self._io.read_bytes(4)
-        if not self.magic == b"\x78\xf3\x9b\xcf":
-            raise kaitaistruct.ValidationNotEqualError(
-                b"\x78\xf3\x9b\xcf", self.magic, self._io, "/seq/0"
-            )
+        if not self.magic == b"\x78\xF3\x9B\xCF":
+            raise kaitaistruct.ValidationNotEqualError(b"\x78\xF3\x9B\xCF", self.magic, self._io, u"/seq/0")
         self.len_header = self._io.read_u4le()
-        self._raw_header = self._io.read_bytes((self.len_header - 8))
+        self._raw_header = self._io.read_bytes(self.len_header - 8)
         _io__raw_header = KaitaiStream(BytesIO(self._raw_header))
         self.header = EsetVirlogParser.Header(_io__raw_header, self, self._root)
         self.threats = []
         for i in range(self.header.num_threats):
             self.threats.append(EsetVirlogParser.Threat(self._io, self, self._root))
 
-    class Widestr(KaitaiStruct):
+
+
+    def _fetch_instances(self):
+        pass
+        self.header._fetch_instances()
+        for i in range(len(self.threats)):
+            pass
+            self.threats[i]._fetch_instances()
+
+
+    class Epilogue(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
-            self._io = _io
+            super(EsetVirlogParser.Epilogue, self).__init__(_io)
             self._parent = _parent
-            self._root = _root if _root else self
+            self._root = _root
             self._read()
 
         def _read(self):
-            self.len_str = self._io.read_u4le()
-            self.str = (self._io.read_bytes((self.len_str - 2))).decode("UTF-16LE")
-            if self.len_str != 0:
-                self.nullbytes = self._io.read_bytes(2)
-                if not self.nullbytes == b"\x00\x00":
-                    raise kaitaistruct.ValidationNotEqualError(
-                        b"\x00\x00", self.nullbytes, self._io, "/types/widestr/seq/2"
-                    )
+            self.data = self._io.read_bytes_full()
 
-    class Unixdate(KaitaiStruct):
-        def __init__(self, _io, _parent=None, _root=None):
-            self._io = _io
-            self._parent = _parent
-            self._root = _root if _root else self
-            self._read()
 
-        def _read(self):
-            self._raw_date_time = self._io.read_bytes(8)
-            _process = maldump.utils.RawTimeConverter("unix")
-            self.date_time = _process.decode(self._raw_date_time)
+        def _fetch_instances(self):
+            pass
+
 
     class Hash(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
-            self._io = _io
+            super(EsetVirlogParser.Hash, self).__init__(_io)
             self._parent = _parent
-            self._root = _root if _root else self
+            self._root = _root
             self._read()
 
         def _read(self):
             self.len_hash = self._io.read_u4le()
             self.hash = self._io.read_bytes(self.len_hash)
 
+
+        def _fetch_instances(self):
+            pass
+
+
     class Header(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
-            self._io = _io
+            super(EsetVirlogParser.Header, self).__init__(_io)
             self._parent = _parent
-            self._root = _root if _root else self
+            self._root = _root
             self._read()
 
         def _read(self):
             self.num_threats = self._io.read_u4le()
             self.filesize = self._io.read_u8le()
             self.timsestamp = EsetVirlogParser.Windate(self._io, self, self._root)
-            self.windowsdatetime_unknown2 = EsetVirlogParser.Windate(
-                self._io, self, self._root
-            )
-            self.windowsdatetime_unknown3 = EsetVirlogParser.Windate(
-                self._io, self, self._root
-            )
+            self.windowsdatetime_unknown2 = EsetVirlogParser.Windate(self._io, self, self._root)
+            self.windowsdatetime_unknown3 = EsetVirlogParser.Windate(self._io, self, self._root)
             self.num_threats2 = self._io.read_u4le()
-            _ = self.num_threats2
-            if not _ == self.num_threats:
-                raise kaitaistruct.ValidationExprError(
-                    self.num_threats2, self._io, "/types/header/seq/5"
-                )
             self.unknown = self._io.read_bytes_full()
 
-    class Threat(KaitaiStruct):
+
+        def _fetch_instances(self):
+            pass
+            self.timsestamp._fetch_instances()
+            self.windowsdatetime_unknown2._fetch_instances()
+            self.windowsdatetime_unknown3._fetch_instances()
+
+
+    class Op(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
-            self._io = _io
+            super(EsetVirlogParser.Op, self).__init__(_io)
             self._parent = _parent
-            self._root = _root if _root else self
+            self._root = _root
             self._read()
 
         def _read(self):
-            self.magic = self._io.read_bytes(4)
-            if not self.magic == b"\xdc\xcf\x8b\x63":
-                raise kaitaistruct.ValidationNotEqualError(
-                    b"\xdc\xcf\x8b\x63", self.magic, self._io, "/types/threat/seq/0"
-                )
-            self.len_record = self._io.read_u4le()
-            self._raw_record = self._io.read_bytes((self.len_record - 8))
-            _io__raw_record = KaitaiStream(BytesIO(self._raw_record))
-            self.record = EsetVirlogParser.Record(_io__raw_record, self, self._root)
+            self.name = KaitaiStream.resolve_enum(EsetVirlogParser.Opcode, self._io.read_u4le())
+            _on = self.name
+            if _on == EsetVirlogParser.Opcode.firstseen:
+                pass
+                self.arg = EsetVirlogParser.Unixdate(self._io, self, self._root)
+            elif _on == EsetVirlogParser.Opcode.infiltration_name:
+                pass
+                self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
+            elif _on == EsetVirlogParser.Opcode.object_hash:
+                pass
+                self.arg = EsetVirlogParser.Hash(self._io, self, self._root)
+            elif _on == EsetVirlogParser.Opcode.object_name:
+                pass
+                self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
+            elif _on == EsetVirlogParser.Opcode.path_name:
+                pass
+                self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
+            elif _on == EsetVirlogParser.Opcode.progpath_name:
+                pass
+                self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
+            elif _on == EsetVirlogParser.Opcode.program_hash:
+                pass
+                self.arg = EsetVirlogParser.Hash(self._io, self, self._root)
+            elif _on == EsetVirlogParser.Opcode.program_name:
+                pass
+                self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
+            elif _on == EsetVirlogParser.Opcode.unknown_epilogue:
+                pass
+                self.arg = EsetVirlogParser.Epilogue(self._io, self, self._root)
+            elif _on == EsetVirlogParser.Opcode.unknown_hash:
+                pass
+                self.arg = EsetVirlogParser.Hash(self._io, self, self._root)
+            elif _on == EsetVirlogParser.Opcode.unknown_hash2:
+                pass
+                self.arg = EsetVirlogParser.Hash(self._io, self, self._root)
+            elif _on == EsetVirlogParser.Opcode.unknown_hash3:
+                pass
+                self.arg = EsetVirlogParser.Hash(self._io, self, self._root)
+            elif _on == EsetVirlogParser.Opcode.unknown_u1int1:
+                pass
+                self.arg = self._io.read_u1()
+            elif _on == EsetVirlogParser.Opcode.unknown_u1int2:
+                pass
+                self.arg = self._io.read_u1()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int1:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int10:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int11:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int12:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int13:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int14:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int15:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int16:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int2:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int3:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int4:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int5:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int6:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int7:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int8:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int9:
+                pass
+                self.arg = self._io.read_u4le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u8int1:
+                pass
+                self.arg = self._io.read_u8le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u8int2:
+                pass
+                self.arg = self._io.read_u8le()
+            elif _on == EsetVirlogParser.Opcode.unknown_u8int3:
+                pass
+                self.arg = self._io.read_u8le()
+            elif _on == EsetVirlogParser.Opcode.user_name:
+                pass
+                self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
+            elif _on == EsetVirlogParser.Opcode.virus_db:
+                pass
+                self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
 
-    class Epilogue(KaitaiStruct):
-        def __init__(self, _io, _parent=None, _root=None):
-            self._io = _io
-            self._parent = _parent
-            self._root = _root if _root else self
-            self._read()
 
-        def _read(self):
-            self.data = self._io.read_bytes_full()
+        def _fetch_instances(self):
+            pass
+            _on = self.name
+            if _on == EsetVirlogParser.Opcode.firstseen:
+                pass
+                self.arg._fetch_instances()
+            elif _on == EsetVirlogParser.Opcode.infiltration_name:
+                pass
+                self.arg._fetch_instances()
+            elif _on == EsetVirlogParser.Opcode.object_hash:
+                pass
+                self.arg._fetch_instances()
+            elif _on == EsetVirlogParser.Opcode.object_name:
+                pass
+                self.arg._fetch_instances()
+            elif _on == EsetVirlogParser.Opcode.path_name:
+                pass
+                self.arg._fetch_instances()
+            elif _on == EsetVirlogParser.Opcode.progpath_name:
+                pass
+                self.arg._fetch_instances()
+            elif _on == EsetVirlogParser.Opcode.program_hash:
+                pass
+                self.arg._fetch_instances()
+            elif _on == EsetVirlogParser.Opcode.program_name:
+                pass
+                self.arg._fetch_instances()
+            elif _on == EsetVirlogParser.Opcode.unknown_epilogue:
+                pass
+                self.arg._fetch_instances()
+            elif _on == EsetVirlogParser.Opcode.unknown_hash:
+                pass
+                self.arg._fetch_instances()
+            elif _on == EsetVirlogParser.Opcode.unknown_hash2:
+                pass
+                self.arg._fetch_instances()
+            elif _on == EsetVirlogParser.Opcode.unknown_hash3:
+                pass
+                self.arg._fetch_instances()
+            elif _on == EsetVirlogParser.Opcode.unknown_u1int1:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u1int2:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int1:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int10:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int11:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int12:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int13:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int14:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int15:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int16:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int2:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int3:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int4:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int5:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int6:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int7:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int8:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u4int9:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u8int1:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u8int2:
+                pass
+            elif _on == EsetVirlogParser.Opcode.unknown_u8int3:
+                pass
+            elif _on == EsetVirlogParser.Opcode.user_name:
+                pass
+                self.arg._fetch_instances()
+            elif _on == EsetVirlogParser.Opcode.virus_db:
+                pass
+                self.arg._fetch_instances()
+
 
     class Record(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
-            self._io = _io
+            super(EsetVirlogParser.Record, self).__init__(_io)
             self._parent = _parent
-            self._root = _root if _root else self
+            self._root = _root
             self._read()
 
         def _read(self):
             self.record_header_magic = self._io.read_bytes(8)
             if not self.record_header_magic == b"\x24\x00\x00\x00\x01\x00\x01\x00":
-                raise kaitaistruct.ValidationNotEqualError(
-                    b"\x24\x00\x00\x00\x01\x00\x01\x00",
-                    self.record_header_magic,
-                    self._io,
-                    "/types/record/seq/0",
-                )
+                raise kaitaistruct.ValidationNotEqualError(b"\x24\x00\x00\x00\x01\x00\x01\x00", self.record_header_magic, self._io, u"/types/record/seq/0")
             self.record_id = self._io.read_u4le()
             self.win_timestamp = EsetVirlogParser.Windate(self._io, self, self._root)
             self.unknown_u4int0 = self._io.read_u4le()
             self.record_id2 = self._io.read_u4le()
-            _ = self.record_id2
-            if not _ == self.record_id:
-                raise kaitaistruct.ValidationExprError(
-                    self.record_id2, self._io, "/types/record/seq/4"
-                )
             self.unknown_u4int1 = self._io.read_u4le()
             self.unknown_u4int2 = self._io.read_u4le()
             self.unknown_u4int3 = self._io.read_u4le()
@@ -199,97 +361,96 @@ class EsetVirlogParser(KaitaiStruct):
                 self.data_fields.append(EsetVirlogParser.Op(self._io, self, self._root))
                 i += 1
 
-    class Windate(KaitaiStruct):
+
+
+        def _fetch_instances(self):
+            pass
+            self.win_timestamp._fetch_instances()
+            for i in range(len(self.data_fields)):
+                pass
+                self.data_fields[i]._fetch_instances()
+
+
+
+    class Threat(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
-            self._io = _io
+            super(EsetVirlogParser.Threat, self).__init__(_io)
             self._parent = _parent
-            self._root = _root if _root else self
+            self._root = _root
+            self._read()
+
+        def _read(self):
+            self.magic = self._io.read_bytes(4)
+            if not self.magic == b"\xDC\xCF\x8B\x63":
+                raise kaitaistruct.ValidationNotEqualError(b"\xDC\xCF\x8B\x63", self.magic, self._io, u"/types/threat/seq/0")
+            self.len_record = self._io.read_u4le()
+            self._raw_record = self._io.read_bytes(self.len_record - 8)
+            _io__raw_record = KaitaiStream(BytesIO(self._raw_record))
+            self.record = EsetVirlogParser.Record(_io__raw_record, self, self._root)
+
+
+        def _fetch_instances(self):
+            pass
+            self.record._fetch_instances()
+
+
+    class Unixdate(KaitaiStruct):
+        def __init__(self, _io, _parent=None, _root=None):
+            super(EsetVirlogParser.Unixdate, self).__init__(_io)
+            self._parent = _parent
+            self._root = _root
             self._read()
 
         def _read(self):
             self._raw_date_time = self._io.read_bytes(8)
-            _process = maldump.utils.RawTimeConverter("windows")
+            _process = maldump.utils.RawTimeConverter(u"unix")
             self.date_time = _process.decode(self._raw_date_time)
 
-    class Op(KaitaiStruct):
+
+        def _fetch_instances(self):
+            pass
+
+
+    class Widestr(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
-            self._io = _io
+            super(EsetVirlogParser.Widestr, self).__init__(_io)
             self._parent = _parent
-            self._root = _root if _root else self
+            self._root = _root
             self._read()
 
         def _read(self):
-            self.name = KaitaiStream.resolve_enum(
-                EsetVirlogParser.Opcode, self._io.read_u4le()
-            )
-            _on = self.name
-            if _on == EsetVirlogParser.Opcode.unknown_u1int1:
-                self.arg = self._io.read_u1()
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int7:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int8:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int16:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.unknown_hash:
-                self.arg = EsetVirlogParser.Hash(self._io, self, self._root)
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int15:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int3:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int1:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.unknown_u1int2:
-                self.arg = self._io.read_u1()
-            elif _on == EsetVirlogParser.Opcode.path_name:
-                self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
-            elif _on == EsetVirlogParser.Opcode.program_hash:
-                self.arg = EsetVirlogParser.Hash(self._io, self, self._root)
-            elif _on == EsetVirlogParser.Opcode.firstseen:
-                self.arg = EsetVirlogParser.Unixdate(self._io, self, self._root)
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int2:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.progpath_name:
-                self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
-            elif _on == EsetVirlogParser.Opcode.infiltration_name:
-                self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
-            elif _on == EsetVirlogParser.Opcode.unknown_hash2:
-                self.arg = EsetVirlogParser.Hash(self._io, self, self._root)
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int14:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.unknown_epilogue:
-                self.arg = EsetVirlogParser.Epilogue(self._io, self, self._root)
-            elif _on == EsetVirlogParser.Opcode.program_name:
-                self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
-            elif _on == EsetVirlogParser.Opcode.object_name:
-                self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
-            elif _on == EsetVirlogParser.Opcode.unknown_hash3:
-                self.arg = EsetVirlogParser.Hash(self._io, self, self._root)
-            elif _on == EsetVirlogParser.Opcode.unknown_u8int1:
-                self.arg = self._io.read_u8le()
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int13:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int4:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.unknown_u8int3:
-                self.arg = self._io.read_u8le()
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int5:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.virus_db:
-                self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
-            elif _on == EsetVirlogParser.Opcode.object_hash:
-                self.arg = EsetVirlogParser.Hash(self._io, self, self._root)
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int12:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.unknown_u8int2:
-                self.arg = self._io.read_u8le()
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int9:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int10:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int6:
-                self.arg = self._io.read_u4le()
-            elif _on == EsetVirlogParser.Opcode.user_name:
-                self.arg = EsetVirlogParser.Widestr(self._io, self, self._root)
-            elif _on == EsetVirlogParser.Opcode.unknown_u4int11:
-                self.arg = self._io.read_u4le()
+            self.len_str = self._io.read_u4le()
+            self.str = (self._io.read_bytes(self.len_str - 2)).decode(u"UTF-16LE")
+            if self.len_str != 0:
+                pass
+                self.nullbytes = self._io.read_bytes(2)
+                if not self.nullbytes == b"\x00\x00":
+                    raise kaitaistruct.ValidationNotEqualError(b"\x00\x00", self.nullbytes, self._io, u"/types/widestr/seq/2")
+
+
+
+        def _fetch_instances(self):
+            pass
+            if self.len_str != 0:
+                pass
+
+
+
+    class Windate(KaitaiStruct):
+        def __init__(self, _io, _parent=None, _root=None):
+            super(EsetVirlogParser.Windate, self).__init__(_io)
+            self._parent = _parent
+            self._root = _root
+            self._read()
+
+        def _read(self):
+            self._raw_date_time = self._io.read_bytes(8)
+            _process = maldump.utils.RawTimeConverter(u"windows")
+            self.date_time = _process.decode(self._raw_date_time)
+
+
+        def _fetch_instances(self):
+            pass
+
+
+

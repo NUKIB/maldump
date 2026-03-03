@@ -7,6 +7,7 @@ from __future__ import annotations
 import contextlib
 import logging
 from datetime import datetime, timezone
+import os
 from typing import TYPE_CHECKING, Any, Callable, Generic, TypeVar
 
 import kaitaistruct
@@ -130,7 +131,7 @@ class Parser(Generic[T]):
         try:
             logger.debug(
                 'Trying to parse file, path "%s" to kaitai, type "%s" on <%s>',
-                path,
+                os.path.abspath(path),
                 kaitai.__name__,
                 self.objname,
             )
@@ -138,13 +139,13 @@ class Parser(Generic[T]):
         except OSError as e:
             logger.exception(
                 'Cannot open nor read kaitai for path "%s"',
-                path,
+                os.path.abspath(path),
                 exc_info=e,
             )
         except kaitaistruct.KaitaiStructError as e:
             logger.warning(
                 'Cannot read kaitai, probably incorrect format for path "%s"',
-                path,
+                os.path.abspath(path),
                 exc_info=e,
             )
         return kt
@@ -187,7 +188,7 @@ class Reader:
                 logger.debug('Trying to read %s file, path "%s"', filetype, path)
                 data = f.read()
         except OSError as e:
-            logger.exception(
+            logger.warning(
                 'Cannot open %s file in ESET on path "%s"', filetype, path, exc_info=e
             )
             data = None

@@ -18,6 +18,7 @@ from __future__ import annotations
 import logging
 import re
 import typing
+import os
 from pathlib import Path
 
 from maldump.constants import ThreatMetadata
@@ -90,7 +91,7 @@ def convertToDict(parser: EsetVirlogParser):
         {
             **{
                 y.name.name: y.arg if hasattr(y, "arg") else None
-                for y in x.record.data_fields
+                for y in x.record.data_fields if hasattr(y.name, "name")
             },
             "timestamp": x.record.win_timestamp.date_time,
         }
@@ -100,13 +101,20 @@ def convertToDict(parser: EsetVirlogParser):
 
 @log.log(lgr=logger)
 def mainParsing(virlog_path):
+    if not virlog_path.is_file():
+        logger.debug("virlog.dat file not found")
+        return []
     kt = parse(EsetParser).kaitai(EsetVirlogParser, virlog_path)
     if kt is None:
-        logger.warning("Skipping virlog.dat parsing")
+        logger.warning("Skipping virlog.dat parsing at %s", os.path.abspath(virlog_path))
         return []
     kt.close()
 
-    threats = convertToDict(kt)
+    try:
+        threats = convertToDict(kt)
+    except Exception as e:
+        logger.warning("Cannot parse virlog.dat at %s", os.path.abspath(virlog_path), exc_info=e)
+        return []
 
     parsedRecords = []
     for idx, record in enumerate(threats):
@@ -161,9 +169,6 @@ class EsetParser(Parser):
 
         for idx, metadata in enumerate(mainParsing(self.location)):
             logger.debug("Parsing entry, idx %s", idx)
-            if metadata["user"] == "SYSTEM":
-                logger.debug("Entry's (idx %s) user is SYSTEM, skipping", idx)
-                continue
             q = QuarEntry(self)
             q.timestamp = metadata["timestamp"]
             q.threat = metadata["infiltration"]
@@ -207,7 +212,7 @@ class EsetParser(Parser):
                 logger.debug('Skipping entry idx %s, path "%s"', idx, entry)
                 continue
             timestamp = DTC.get_dt_from_stat(entry_stat)
-            path = str(entry)
+            path = orig_path = str(os.path.abspath(entry))
             sha1 = None
             size = entry_stat.st_size
             threat = ThreatMetadata.UNKNOWN_THREAT
@@ -223,6 +228,7 @@ class EsetParser(Parser):
             q = QuarEntry(self)
             q.timestamp = timestamp
             q.path = path
+            q.orig_path = orig_path
             q.sha1 = sha1
             q.size = size
             q.threat = threat

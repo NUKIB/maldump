@@ -56,7 +56,7 @@ class KasperskyParser(Parser):
             cursor.execute("SELECT * FROM 'objects'")
             rows = cursor.fetchall()
         except sqlite3.Error as e:
-            logger.exception(
+            logger.info(
                 'Cannot open nor read from a database file, path "%s"',
                 db_file,
                 exc_info=e,
