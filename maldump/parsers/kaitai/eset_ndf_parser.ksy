@@ -27,15 +27,10 @@ seq:
 
 
 types:
-  threat:
+  webthreat: {}
+
+  localthreat:
     seq:
-      - id: mal_path
-        type: widestr
-      - id: date_block_size
-        type: u4
-      - id: date_block_header
-        size: 0x04
-        contents: [ 0x4e, 0x49, 0x57, 0x49 ]  # NIWI
       - id: datetime_quar_enc_start
         type: windate
       - id: datetime_first_utc
@@ -46,6 +41,22 @@ types:
         type: u4
       - id: datetime_latest_occurence
         type: unixdate
+
+  threat:
+    seq:
+      - id: mal_path
+        type: widestr
+      - id: date_block_size
+        type: u4
+      - id: block_type_header
+        type: u4
+        enum: block_type
+      - id: block_header
+        type:
+          switch-on: block_type_header
+          cases:
+            'block_type::local_threat_block': localthreat
+            'block_type::web_threat_block': webthreat
       - id: filler1
         size: 0x04
         contents: [ 0x00, 0x00, 0x00, 0x00 ]
@@ -84,3 +95,8 @@ types:
         type: str
         encoding: UTF-16LE
         size: 2 * len_str
+
+enums:
+  block_type:
+    0x4957494e: "local_threat_block"
+    0x6af88a0c: "web_threat_block"
