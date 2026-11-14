@@ -89,8 +89,9 @@ def convertToDict(parser: EsetVirlogParser):
     return [
         {
             **{
-                y.name.name: y.arg if hasattr(y, "arg") else None
-                for y in x.record.data_fields
+                z.name.name: z.arg if hasattr(z, "arg") else None
+                for y in x.record.subrecords
+                for z in y.subsubrecords.data_fields
             },
             "timestamp": x.record.win_timestamp.date_time,
         }
