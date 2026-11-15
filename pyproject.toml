@@ -12,9 +12,9 @@ authors = [
 dependencies = [
     "colorama==0.4.6",
     "defusedxml==0.7.1",
-    "kaitaistruct==0.10",
+    "kaitaistruct==0.11",
     "arc4==0.4.0",
-    "types-colorama==0.4.15.12",
+    "types-colorama==0.4.15.20260508",
 ]
 requires-python = ">=3.8"
 readme = "README.md"

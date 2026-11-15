@@ -89,8 +89,9 @@ def convertToDict(parser: EsetVirlogParser):
     return [
         {
             **{
-                y.name.name: y.arg if hasattr(y, "arg") else None
-                for y in x.record.data_fields
+                z.name.name: z.arg if hasattr(z, "arg") else None
+                for y in x.record.subrecords
+                for z in y.subsubrecords.data_fields
             },
             "timestamp": x.record.win_timestamp.date_time,
         }
@@ -208,6 +209,7 @@ class EsetParser(Parser):
                 continue
             timestamp = DTC.get_dt_from_stat(entry_stat)
             path = str(entry)
+            path2 = ""
             sha1 = None
             size = entry_stat.st_size
             threat = ThreatMetadata.UNKNOWN_THREAT
@@ -216,9 +218,13 @@ class EsetParser(Parser):
             if kt is not None:
                 timestamp = kt.datetime_unix.date_time
                 path = kt.findings[0].mal_path.str
+                path2 = kt.findings[0].mal_path2.str
                 sha1 = hex(int.from_bytes(kt.mal_hash_sha1, "big")).lstrip("0x")
                 size = kt.mal_size
                 threat = kt.findings[0].threat_canonized.str
+
+            paths = [p for p in [path, path2] if p]
+            path = " ; ".join(paths)
 
             q = QuarEntry(self)
             q.timestamp = timestamp
