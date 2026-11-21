@@ -188,7 +188,7 @@ class Reader:
                 data = f.read()
         except OSError as e:
             logger.exception(
-                'Cannot open %s file in ESET on path "%s"', filetype, path, exc_info=e
+                'Cannot open %s file on path "%s"', filetype, path, exc_info=e
             )
             data = None
 
